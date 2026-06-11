@@ -83,7 +83,16 @@ class SettingsScreen extends StatelessWidget {
     final c = AppColors.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text('settings'.tr)),
+      appBar: AppBar(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/app_icon.png', height: 28, width: 28),
+            const SizedBox(width: AppDimens.space3),
+            Text('settings'.tr),
+          ],
+        ),
+      ),
       body: Obx(() {
         final user = auth.user.value;
         final myReviewCount = reviews.myReviews().length;

@@ -29,8 +29,14 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppInfo.appName,
-            style: AppTextStyles.heading2.copyWith(color: c.primaryText)),
+        title: Row(
+          children: [
+            Image.asset('assets/app_icon.png', height: 32, width: 32),
+            const SizedBox(width: AppDimens.space3),
+            Text(AppInfo.appName,
+                style: AppTextStyles.heading2.copyWith(color: c.primaryText)),
+          ],
+        ),
         actions: [
           // Inline language switcher pills (spec 4.5).
           const _LanguagePills(),
@@ -55,33 +61,26 @@ class HomeScreen extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.all(AppDimens.space4),
           children: [
-            // ---- Search bar (navigates to the Search tab) ----
-            InkWell(
-              borderRadius: BorderRadius.circular(AppDimens.radiusMd),
-              onTap: () => app.changeTab(1),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppDimens.space3, vertical: AppDimens.space3),
-                decoration: BoxDecoration(
-                  color: c.bgInput,
+            // ---- District chip and Search ----
+            Row(
+              children: [
+                const Expanded(child: DistrictChip()),
+                const SizedBox(width: AppDimens.space3),
+                InkWell(
                   borderRadius: BorderRadius.circular(AppDimens.radiusMd),
-                  border: Border.all(color: c.borderLight),
+                  onTap: () => app.changeTab(1),
+                  child: Container(
+                    padding: const EdgeInsets.all(AppDimens.space3),
+                    decoration: BoxDecoration(
+                      color: c.bgInput,
+                      borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+                      border: Border.all(color: c.borderLight),
+                    ),
+                    child: Icon(Icons.search, size: 24, color: c.textTertiary),
+                  ),
                 ),
-                child: Row(children: [
-                  Icon(Icons.search, size: 20, color: c.textTertiary),
-                  const SizedBox(width: AppDimens.space2),
-                  Expanded(
-                      child: Text('search_hint'.tr,
-                          style: AppTextStyles.body
-                              .copyWith(color: c.textTertiary))),
-                  Icon(Icons.tune, size: 20, color: c.textTertiary),
-                ]),
-              ),
+              ],
             ),
-            const SizedBox(height: AppDimens.space3),
-
-            // ---- District chip ----
-            const DistrictChip(),
             const SizedBox(height: AppDimens.space5),
 
             // ---- Emergency banner ----
