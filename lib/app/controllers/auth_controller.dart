@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/models/user_model.dart';
@@ -57,10 +60,19 @@ class AuthController extends GetxController {
   // -------------------------------------------------------------------
 
   /// Restores a persisted session; called from main() before runApp.
+  /// Persisted user fields (kept in one list so save/restore/clear match).
+  static const _userFields = [
+    'id',
+    'phoneHash',
+    'displayName',
+    'avatarPath',
+    'createdAt',
+  ];
+
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     final map = <String, String>{};
-    for (final field in ['id', 'phoneHash', 'displayName', 'createdAt']) {
+    for (final field in _userFields) {
       final v = _prefs.getString('$_kUserPrefix$field');
       if (v != null) map[field] = v;
     }
@@ -167,11 +179,13 @@ class AuthController extends GetxController {
   }
 
   /// Builds + persists the session, then returns to the pending screen.
+  /// A previously saved profile photo for this number is restored.
   void _createSession(String phoneHash, String displayName) {
     final u = AppUser(
       id: phoneHash,
       phoneHash: phoneHash,
       displayName: displayName,
+      avatarPath: _prefs.getString('avatar_for_$phoneHash'),
       createdAt: DateTime.now(),
     );
     user.value = u;
@@ -197,20 +211,64 @@ class AuthController extends GetxController {
     _prefs.setString('name_for_${u.phoneHash}', u.displayName);
   }
 
+  /// Opens the platform photo picker and sets the chosen image as the
+  /// profile photo. The image is copied into the app's documents folder
+  /// (gallery cache paths are temporary), persisted on the session AND
+  /// keyed to the phone hash so it survives logout/login.
+  Future<void> pickAvatar() async {
+    final u = user.value;
+    if (u == null) return;
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 600, // Avatar-sized — keeps the copy small
+      maxHeight: 600,
+      imageQuality: 85,
+    );
+    if (picked == null) return; // User cancelled the picker
+
+    final docs = await getApplicationDocumentsDirectory();
+    final ext = picked.path.split('.').last;
+    final dest = File('${docs.path}/avatar_${u.phoneHash}.$ext');
+    await File(picked.path).copy(dest.path);
+
+    u.avatarPath = dest.path;
+    user.refresh();
+    _prefs.setString('${_kUserPrefix}avatarPath', dest.path);
+    _prefs.setString('avatar_for_${u.phoneHash}', dest.path);
+  }
+
+  /// Removes the profile photo and falls back to the initials avatar.
+  Future<void> removeAvatar() async {
+    final u = user.value;
+    if (u == null || u.avatarPath == null) return;
+    try {
+      await File(u.avatarPath!).delete();
+    } catch (_) {} // Already gone — ignore
+    u.avatarPath = null;
+    user.refresh();
+    _prefs.remove('${_kUserPrefix}avatarPath');
+    _prefs.remove('avatar_for_${u.phoneHash}');
+  }
+
   /// Signs out, clearing the persisted session (bookmarks are kept —
-  /// they are device-level, not account-level).
+  /// they are device-level, not account-level; the photo stays keyed to
+  /// the phone number so it returns on next login).
   void logout() {
     user.value = null;
-    for (final field in ['id', 'phoneHash', 'displayName', 'createdAt']) {
+    for (final field in _userFields) {
       _prefs.remove('$_kUserPrefix$field');
     }
     _resetWizard();
   }
 
-  /// Permanently deletes the account (Settings → destructive action).
+  /// Permanently deletes the account (Settings → destructive action),
+  /// including the stored name and profile photo.
   void deleteAccount() {
     final u = user.value;
-    if (u != null) _prefs.remove('name_for_${u.phoneHash}');
+    if (u != null) {
+      _prefs.remove('name_for_${u.phoneHash}');
+      removeAvatar();
+    }
     logout();
   }
 

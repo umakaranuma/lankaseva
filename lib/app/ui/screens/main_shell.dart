@@ -4,14 +4,16 @@ import 'package:get/get.dart';
 import '../../controllers/app_controller.dart';
 import 'home_screen.dart';
 import 'map_screen.dart';
-import 'profile_screen.dart';
 import 'reviews_screen.dart';
 import 'search_screen.dart';
+import 'settings_screen.dart';
 
 /// ---------------------------------------------------------------------------
-/// MainShell — bottom-tab scaffold hosting the five primary tabs
-/// (spec 4.5: Home · Search · Map · Reviews · Profile). Tab index lives in
-/// AppController so other screens can switch tabs programmatically.
+/// MainShell — bottom-tab scaffold hosting the five primary tabs:
+/// Home · Search · Map · Reviews · Settings. (Profile was merged into
+/// Settings for a simpler, friendlier navigation — account details live at
+/// the top of the Settings tab.) Tab index lives in AppController so other
+/// screens can switch tabs programmatically.
 /// ---------------------------------------------------------------------------
 class MainShell extends StatelessWidget {
   const MainShell({super.key});
@@ -24,7 +26,7 @@ class MainShell extends StatelessWidget {
       SearchScreen(),
       MapScreen(),
       ReviewsScreen(),
-      ProfileScreen(),
+      SettingsScreen(),
     ];
 
     return Obx(() => Scaffold(
@@ -49,9 +51,9 @@ class MainShell extends StatelessWidget {
                   activeIcon: const Icon(Icons.star),
                   label: 'tab_reviews'.tr),
               BottomNavigationBarItem(
-                  icon: const Icon(Icons.person_outline),
-                  activeIcon: const Icon(Icons.person),
-                  label: 'tab_profile'.tr),
+                  icon: const Icon(Icons.settings_outlined),
+                  activeIcon: const Icon(Icons.settings),
+                  label: 'settings'.tr),
             ],
           ),
         ));

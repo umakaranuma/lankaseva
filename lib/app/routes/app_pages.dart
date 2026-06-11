@@ -7,8 +7,11 @@ import '../ui/screens/emergency_screen.dart';
 import '../ui/screens/language_screen.dart';
 import '../ui/screens/login_screen.dart';
 import '../ui/screens/main_shell.dart';
+import '../ui/screens/my_reviews_screen.dart';
+import '../ui/screens/notifications_screen.dart';
 import '../ui/screens/onboarding_screen.dart';
 import '../ui/screens/service_detail_screen.dart';
+import '../ui/screens/service_map_screen.dart';
 import '../ui/screens/settings_screen.dart';
 import '../ui/screens/splash_screen.dart';
 import '../ui/screens/write_review_screen.dart';
@@ -27,9 +30,12 @@ abstract class Routes {
   static const emergency = '/emergency';
   static const categoryList = '/category';
   static const serviceDetail = '/service'; // arguments: Service
+  static const serviceMap = '/service-map'; // arguments: Service (route view)
   static const writeReview = '/write-review'; // arguments: Service
   static const login = '/login';
   static const settings = '/settings';
+  static const notifications = '/notifications';
+  static const myReviews = '/my-reviews';
   static const about = '/about';
 }
 
@@ -46,9 +52,13 @@ class AppPages {
     GetPage(name: Routes.emergency, page: () => const EmergencyScreen()),
     GetPage(name: Routes.categoryList, page: () => const CategoryListScreen()),
     GetPage(name: Routes.serviceDetail, page: () => const ServiceDetailScreen()),
+    GetPage(name: Routes.serviceMap, page: () => const ServiceMapScreen()),
     GetPage(name: Routes.writeReview, page: () => const WriteReviewScreen()),
     GetPage(name: Routes.login, page: () => const LoginScreen()),
     GetPage(name: Routes.settings, page: () => const SettingsScreen()),
+    GetPage(
+        name: Routes.notifications, page: () => const NotificationsScreen()),
+    GetPage(name: Routes.myReviews, page: () => const MyReviewsScreen()),
     GetPage(name: Routes.about, page: () => const AboutScreen()),
   ];
 }

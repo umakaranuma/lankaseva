@@ -7,12 +7,16 @@ class AppUser {
   final String id;
   final String phoneHash;
   String displayName;
+
+  /// Local file path of the user's profile photo (null = initials avatar).
+  String? avatarPath;
   final DateTime createdAt;
 
   AppUser({
     required this.id,
     required this.phoneHash,
     required this.displayName,
+    this.avatarPath,
     required this.createdAt,
   });
 
@@ -30,6 +34,7 @@ class AppUser {
         'id': id,
         'phoneHash': phoneHash,
         'displayName': displayName,
+        'avatarPath': ?avatarPath,
         'createdAt': createdAt.toIso8601String(),
       };
 
@@ -40,6 +45,7 @@ class AppUser {
       id: map['id']!,
       phoneHash: map['phoneHash'] ?? '',
       displayName: map['displayName'] ?? 'User',
+      avatarPath: map['avatarPath'],
       createdAt: DateTime.tryParse(map['createdAt'] ?? '') ?? DateTime.now(),
     );
   }

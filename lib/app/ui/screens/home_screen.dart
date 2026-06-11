@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import '../../controllers/app_controller.dart';
 import '../../controllers/directory_controller.dart';
+import '../../controllers/notification_controller.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
@@ -33,9 +34,19 @@ class HomeScreen extends StatelessWidget {
         actions: [
           // Inline language switcher pills (spec 4.5).
           const _LanguagePills(),
-          IconButton(
-              icon: const Icon(Icons.notifications_none),
-              onPressed: () => Get.toNamed(Routes.settings)),
+          // Notification bell with a live unread badge.
+          Obx(() {
+            final unread =
+                Get.find<NotificationController>().unreadCount;
+            return IconButton(
+              icon: Badge(
+                isLabelVisible: unread > 0,
+                label: Text('$unread'),
+                child: const Icon(Icons.notifications_none),
+              ),
+              onPressed: () => Get.toNamed(Routes.notifications),
+            );
+          }),
         ],
       ),
       body: Obx(() {

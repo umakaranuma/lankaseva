@@ -36,6 +36,17 @@ class ReviewController extends GetxController {
   final RxnInt feedStarFilter = RxnInt();
   final RxBool feedDistrictOnly = true.obs;
 
+  // ---- Pagination ----
+  /// Page size shared by the community feed and detail review lists.
+  static const int reviewPageSize = 10;
+
+  /// Visible review count on the community feed (grows per page).
+  final RxInt feedVisible = reviewPageSize.obs;
+
+  /// Visible review count on the Service Detail screen. Starts small so
+  /// the contact info stays above the fold; "See all" reveals more.
+  final RxInt detailVisible = 3.obs;
+
   /// Selectable experience tags (translation keys — spec 4.12).
   static const positiveTagKeys = [
     'tag_helpful_staff',
@@ -130,12 +141,27 @@ class ReviewController extends GetxController {
     }).toList();
   }
 
-  /// Toggles the feed star filter chip (tap again to clear).
-  void setFeedStarFilter(int? stars) =>
-      feedStarFilter.value = feedStarFilter.value == stars ? null : stars;
+  /// Toggles the feed star filter chip (tap again to clear) and restarts
+  /// feed pagination so results show from the top.
+  void setFeedStarFilter(int? stars) {
+    feedStarFilter.value = feedStarFilter.value == stars ? null : stars;
+    feedVisible.value = reviewPageSize;
+  }
 
-  /// Toggles district-only mode on the community feed.
-  void toggleFeedDistrictOnly() => feedDistrictOnly.toggle();
+  /// Toggles district-only mode on the community feed (resets pagination).
+  void toggleFeedDistrictOnly() {
+    feedDistrictOnly.toggle();
+    feedVisible.value = reviewPageSize;
+  }
+
+  /// Reveals the next page of the community feed.
+  void loadMoreFeed() => feedVisible.value += reviewPageSize;
+
+  /// Resets the detail-screen review pagination (call on screen open).
+  void resetDetailReviews() => detailVisible.value = 3;
+
+  /// Reveals the next page of reviews on the Service Detail screen.
+  void loadMoreDetailReviews() => detailVisible.value += reviewPageSize;
 
   // -------------------------------------------------------------------
   // Write-review flow

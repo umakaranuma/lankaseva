@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -213,12 +213,10 @@ class AppController extends GetxController {
     await openUrl(uri.toString());
   }
 
-  /// Shares text content. Falls back to the system share sheet via a
-  /// mailto-free approach: uses the platform share URL scheme when possible;
-  /// otherwise copies to clipboard and toasts. Kept dependency-light.
+  /// Opens the native platform share sheet (WhatsApp, SMS, email, …) with
+  /// the given text — used for service cards, emergency lists and reviews.
   Future<void> shareText(String text) async {
-    await Clipboard.setData(ClipboardData(text: text));
-    _toast('Copied — paste to share');
+    await SharePlus.instance.share(ShareParams(text: text));
   }
 
   /// Lightweight bottom snackbar used for all feedback toasts.

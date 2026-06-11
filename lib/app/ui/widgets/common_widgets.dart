@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -76,6 +78,33 @@ class InitialsAvatar extends StatelessWidget {
               color: c.primary,
               fontWeight: FontWeight.w600,
               fontSize: size * 0.36)),
+    );
+  }
+}
+
+/// Profile avatar: shows the user's photo when one is set, otherwise the
+/// initials circle. Used on the Settings account card.
+class UserAvatar extends StatelessWidget {
+  final String? imagePath;
+  final String initials;
+  final double size;
+  const UserAvatar({
+    super.key,
+    required this.imagePath,
+    required this.initials,
+    this.size = 52,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final path = imagePath;
+    // Fall back to initials when no photo (or the file was removed).
+    if (path == null || !File(path).existsSync()) {
+      return InitialsAvatar(initials: initials, size: size);
+    }
+    return ClipOval(
+      child: Image.file(File(path),
+          width: size, height: size, fit: BoxFit.cover),
     );
   }
 }

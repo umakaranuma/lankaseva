@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../core/constants/app_constants.dart';
 import '../data/models/service_model.dart';
+import '../data/sources/route_service.dart';
 import 'app_controller.dart';
 import 'geocoding_controller.dart';
 
@@ -164,6 +165,61 @@ class LocationController extends GetxController {
   // -------------------------------------------------------------------
   // Distances
   // -------------------------------------------------------------------
+
+  // -------------------------------------------------------------------
+  // Routing (path from current location to a service)
+  // -------------------------------------------------------------------
+
+  /// Polyline of the active route (empty when no route is shown).
+  final RxList<(double, double)> routePoints = <(double, double)>[].obs;
+
+  /// Totals banner data for the active route (null = none / unavailable).
+  final Rxn<RouteResult> routeInfo = Rxn<RouteResult>();
+
+  /// True while a route request is in flight.
+  final RxBool isRouting = false.obs;
+
+  /// Builds the path from the user's current location to [toLat],[toLng]:
+  ///   1. runs the permission + GPS flow (silently skips when refused —
+  ///      the map then simply shows the destination pin alone)
+  ///   2. asks OSRM for the real driving route
+  ///   3. falls back to a straight line when routing is unreachable
+  Future<void> buildRouteTo(double toLat, double toLng) async {
+    clearRoute();
+    final fix = await getCurrentPosition();
+    if (fix == null) return; // No permission/fix → destination-only view
+
+    isRouting.value = true;
+    try {
+      final result =
+          await RouteService.route(fix.latitude, fix.longitude, toLat, toLng);
+      if (result != null) {
+        routePoints.assignAll(result.points);
+        routeInfo.value = result;
+      } else {
+        // Offline fallback: straight line with great-circle distance.
+        routePoints.assignAll([
+          (fix.latitude, fix.longitude),
+          (toLat, toLng),
+        ]);
+        routeInfo.value = RouteResult(
+          points: routePoints.toList(),
+          distanceKm: Geolocator.distanceBetween(
+                  fix.latitude, fix.longitude, toLat, toLng) /
+              1000,
+          durationMin: 0, // Unknown without the router
+        );
+      }
+    } finally {
+      isRouting.value = false;
+    }
+  }
+
+  /// Clears the active route (called when leaving the route view).
+  void clearRoute() {
+    routePoints.clear();
+    routeInfo.value = null;
+  }
 
   /// Real distance (km) from the user to a service, measured against the
   /// service's exact geocoded position when available. Falls back to the

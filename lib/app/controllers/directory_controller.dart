@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../core/constants/app_constants.dart';
 import '../data/models/service_model.dart';
 import '../data/sources/service_data_source.dart';
+import '../routes/app_pages.dart';
 import 'app_controller.dart';
 import 'geocoding_controller.dart';
 import 'location_controller.dart';
@@ -59,14 +60,29 @@ class DirectoryController extends GetxController {
   // Category List screen
   // -------------------------------------------------------------------
 
-  /// Opens a category: remembers it and resets the sort to default.
+  /// Page size for category listings (pagination, keeps long district
+  /// lists fast and scannable).
+  static const int categoryPageSize = 8;
+
+  /// How many category results are currently visible (grows by page).
+  final RxInt categoryVisible = categoryPageSize.obs;
+
+  /// Opens a category: remembers it, resets sort AND pagination.
   void openCategory(ServiceCategory category) {
     activeCategory.value = category;
     sort.value = ServiceSort.nearest;
+    categoryVisible.value = categoryPageSize;
   }
 
-  /// Selects a sort chip on the Category List screen.
-  void changeSort(ServiceSort value) => sort.value = value;
+  /// Selects a sort chip; pagination restarts from the first page so the
+  /// user always sees the new ordering from the top.
+  void changeSort(ServiceSort value) {
+    sort.value = value;
+    categoryVisible.value = categoryPageSize;
+  }
+
+  /// Reveals the next page of category results.
+  void loadMoreCategory() => categoryVisible.value += categoryPageSize;
 
   /// Services in the active category + district, ordered by the active
   /// sort chip. "Open now" filters rather than sorts (matches spec intent).
@@ -117,14 +133,12 @@ class DirectoryController extends GetxController {
   // Shared actions
   // -------------------------------------------------------------------
 
-  /// Opens the platform map app pointed at the service's EXACT position
-  /// (geocoded coordinates when resolved, seeded estimate otherwise).
-  /// Also queues a geocode lookup so repeat opens get more accurate.
+  /// Opens the in-app route view for a service: the exact place pinned on
+  /// OpenStreetMap with the driving path from the user's current location
+  /// drawn when permission is granted (ServiceMapScreen handles the flow).
   void openServiceMap(Service s) {
-    final geocoder = Get.find<GeocodingController>();
-    geocoder.ensureResolved([s]);
-    final (lat, lng) = geocoder.positionOf(s);
-    _app.openMap(lat, lng, s.name.of(_app.language.value));
+    Get.find<GeocodingController>().ensureResolved([s]);
+    Get.toNamed(Routes.serviceMap, arguments: s);
   }
 
   /// Builds the shareable text block for a service (spec 5.3 — Service

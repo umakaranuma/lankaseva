@@ -28,7 +28,10 @@ class ReviewsScreen extends StatelessWidget {
       appBar: AppBar(title: Text('community_reviews'.tr)),
       body: Obx(() {
         final lang = app.language.value;
-        final feed = reviews.communityFeed();
+        final fullFeed = reviews.communityFeed();
+        // Paginated slice of the feed (controller owns the page cursor).
+        final feed = fullFeed.take(reviews.feedVisible.value).toList();
+        final hasMore = fullFeed.length > feed.length;
         return Column(
           children: [
             // Filter row: district-only toggle + 1–5 star chips.
@@ -64,8 +67,19 @@ class ReviewsScreen extends StatelessWidget {
                   : ListView.builder(
                       padding: const EdgeInsets.symmetric(
                           horizontal: AppDimens.space4),
-                      itemCount: feed.length,
+                      // Extra slot hosts the "Load more" pagination button.
+                      itemCount: feed.length + (hasMore ? 1 : 0),
                       itemBuilder: (_, i) {
+                        if (i >= feed.length) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: AppDimens.space3),
+                            child: OutlinedButton(
+                              onPressed: reviews.loadMoreFeed,
+                              child: Text('load_more'.tr),
+                            ),
+                          );
+                        }
                         final r = feed[i];
                         final service = ServiceDataSource.byId(r.serviceId);
                         if (service == null) return const SizedBox.shrink();

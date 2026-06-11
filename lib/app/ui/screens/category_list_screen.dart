@@ -86,12 +86,31 @@ class CategoryListScreen extends StatelessWidget {
                       ctaLabel: 'suggest_service'.tr,
                       onCta: directory.suggestService,
                     )
+                  // Paginated results: one extra slot renders the
+                  // "Load more" button while pages remain.
                   : ListView.builder(
                       padding: const EdgeInsets.symmetric(
                           horizontal: AppDimens.space4),
-                      itemCount: services.length,
-                      itemBuilder: (_, i) =>
-                          ServiceCard(service: services[i]),
+                      itemCount: (services.length >
+                                  directory.categoryVisible.value
+                              ? directory.categoryVisible.value
+                              : services.length) +
+                          (services.length > directory.categoryVisible.value
+                              ? 1
+                              : 0),
+                      itemBuilder: (_, i) {
+                        if (i >= directory.categoryVisible.value) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: AppDimens.space3),
+                            child: OutlinedButton(
+                              onPressed: directory.loadMoreCategory,
+                              child: Text('load_more'.tr),
+                            ),
+                          );
+                        }
+                        return ServiceCard(service: services[i]);
+                      },
                     ),
             ),
           ],

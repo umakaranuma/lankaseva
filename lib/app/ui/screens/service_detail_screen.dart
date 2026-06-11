@@ -18,11 +18,23 @@ import '../widgets/common_widgets.dart';
 /// review section for one service (spec 4.8). The Service object arrives
 /// via route arguments; all behaviour is delegated to controllers.
 /// ---------------------------------------------------------------------------
-class ServiceDetailScreen extends StatelessWidget {
+class ServiceDetailScreen extends StatefulWidget {
   const ServiceDetailScreen({super.key});
 
+  @override
+  State<ServiceDetailScreen> createState() => _ServiceDetailScreenState();
+}
+
+class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   /// Weekday labels for the opening-hours table.
   static const _days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  @override
+  void initState() {
+    super.initState();
+    // Restart review pagination so every detail visit shows page one.
+    Get.find<ReviewController>().resetDetailReviews();
+  }
 
   /// Routes to Write Review, detouring through Login when signed out
   /// (spec 4.12 — login with return redirect).
@@ -51,7 +63,11 @@ class ServiceDetailScreen extends StatelessWidget {
         final avg = reviewsCtrl.averageFor(service.id);
         final count = reviewsCtrl.countFor(service.id);
         final dist = reviewsCtrl.distributionFor(service.id);
-        final reviews = reviewsCtrl.reviewsFor(service.id).take(10).toList();
+        // Paginated review slice — grows via "See all N reviews".
+        final allReviews = reviewsCtrl.reviewsFor(service.id);
+        final reviews =
+            allReviews.take(reviewsCtrl.detailVisible.value).toList();
+        final moreCount = allReviews.length - reviews.length;
         final isOpen = service.hours.isOpenAt(DateTime.now());
         final saved = app.isSaved(service.id);
 
@@ -175,6 +191,22 @@ class ServiceDetailScreen extends StatelessWidget {
                             style: AppTextStyles.bodySm
                                 .copyWith(color: c.info)),
                         onTap: () => app.openUrl(service.website!),
+                      ),
+                    // WhatsApp contact (gap fix — field existed in the
+                    // model but was never rendered).
+                    if (service.whatsapp != null)
+                      ListTile(
+                        dense: true,
+                        leading: Icon(Icons.chat_outlined,
+                            color: c.success, size: 20),
+                        title: Text('whatsapp'.tr,
+                            style: AppTextStyles.caption
+                                .copyWith(color: c.textTertiary)),
+                        subtitle: Text(service.whatsapp!,
+                            style: AppTextStyles.phoneNumber
+                                .copyWith(color: c.success)),
+                        onTap: () => app.openUrl(
+                            'https://wa.me/${service.whatsapp!.replaceAll(RegExp(r'\D'), '')}'),
                       ),
                     // Opening hours by day.
                     Padding(
@@ -374,6 +406,14 @@ class ServiceDetailScreen extends StatelessWidget {
                           ),
                         ],
                       ),
+                    ),
+
+                  // Pagination: reveal the next page of reviews.
+                  if (moreCount > 0)
+                    TextButton(
+                      onPressed: reviewsCtrl.loadMoreDetailReviews,
+                      child: Text('see_all_reviews'
+                          .trParams({'count': '${allReviews.length}'})),
                     ),
 
                   // ---- Report incorrect info ----
