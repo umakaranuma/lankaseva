@@ -104,8 +104,10 @@ class _SplashScreenState extends State<SplashScreen>
                                       Colors.white.withValues(alpha: 0.25),
                                   width: 2),
                             ),
-                            child: const Icon(Icons.shield_outlined,
-                                size: 56, color: Colors.white),
+                            child: Padding(
+                              padding: const EdgeInsets.all(26.0),
+                              child: Image.asset('assets/app_icon.png'),
+                            ),
                           ),
                         ),
                       ),
@@ -117,7 +119,7 @@ class _SplashScreenState extends State<SplashScreen>
                           position: _textSlide,
                           child: Column(
                             children: [
-                              Text(AppInfo.appName,
+                              Text('app_name'.tr,
                                   style: AppTextStyles.display.copyWith(
                                       color: Colors.white,
                                       fontSize: 32,

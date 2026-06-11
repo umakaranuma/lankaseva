@@ -33,7 +33,7 @@ class HomeScreen extends StatelessWidget {
           children: [
             Image.asset('assets/app_icon.png', height: 32, width: 32),
             const SizedBox(width: AppDimens.space3),
-            Text(AppInfo.appName,
+            Text('app_name'.tr,
                 style: AppTextStyles.heading2.copyWith(color: c.primaryText)),
           ],
         ),

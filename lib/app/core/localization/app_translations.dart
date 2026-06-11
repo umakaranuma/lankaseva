@@ -20,6 +20,7 @@ class AppTranslations extends Translations {
 
   static const Map<String, String> _en = {
     // Generic
+    'app_name': 'LankaSeva',
     'app_tagline': 'Every service. One tap away.',
     'continue': 'Continue',
     'skip': 'Skip',
@@ -230,6 +231,7 @@ class AppTranslations extends Translations {
   };
 
   static const Map<String, String> _si = {
+    'app_name': 'ලංකා සේවා',
     'app_tagline': 'සෑම සේවාවක්ම. එක ක්ලික් එකකින්.',
     'continue': 'ඉදිරියට',
     'skip': 'මඟ හරින්න',
@@ -421,6 +423,7 @@ class AppTranslations extends Translations {
   };
 
   static const Map<String, String> _ta = {
+    'app_name': 'LankaSeva',
     'app_tagline': 'ஒவ்வொரு சேவையும். ஒரு தட்டில்.',
     'continue': 'தொடரவும்',
     'skip': 'தவிர்',
