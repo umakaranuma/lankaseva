@@ -117,7 +117,13 @@ class _MapScreenState extends State<MapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('tab_map'.tr),
+        title: Row(
+          children: [
+            Image.asset('assets/app_icon.png', height: 32, width: 32),
+            const SizedBox(width: AppDimens.space3),
+            Text('tab_map'.tr),
+          ],
+        ),
         actions: [
           // Map / List toggle (spec 4.10).
           Obx(() => IconButton(

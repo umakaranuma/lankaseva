@@ -85,9 +85,8 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Row(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset('assets/app_icon.png', height: 28, width: 28),
+            Image.asset('assets/app_icon.png', height: 32, width: 32),
             const SizedBox(width: AppDimens.space3),
             Text('settings'.tr),
           ],

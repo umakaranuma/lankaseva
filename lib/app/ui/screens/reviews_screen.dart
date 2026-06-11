@@ -25,7 +25,15 @@ class ReviewsScreen extends StatelessWidget {
     final c = AppColors.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text('community_reviews'.tr)),
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Image.asset('assets/app_icon.png', height: 32, width: 32),
+            const SizedBox(width: AppDimens.space3),
+            Text('community_reviews'.tr),
+          ],
+        ),
+      ),
       body: Obx(() {
         final lang = app.language.value;
         final fullFeed = reviews.communityFeed();
