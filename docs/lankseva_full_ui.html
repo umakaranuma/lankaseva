@@ -1,0 +1,350 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.phone-shell{width:375px;margin:0 auto;border:1.5px solid var(--color-border-secondary);border-radius:36px;overflow:hidden;background:var(--color-background-primary);box-shadow:none}
+.status-bar{background:#0F6E56;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:10px 20px 6px;font-size:11px;font-weight:500}
+.nav-header{background:#0F6E56;padding:12px 16px 16px;color:#fff}
+.nav-header h1{font-size:20px;font-weight:500;margin-bottom:2px}
+.nav-header p{font-size:12px;opacity:0.8}
+.lang-pills{display:flex;gap:6px;margin-top:10px}
+.lang-pill{font-size:11px;padding:3px 10px;border-radius:20px;background:rgba(255,255,255,0.2);color:#fff;cursor:pointer;border:0.5px solid rgba(255,255,255,0.35)}
+.lang-pill.active{background:#fff;color:#0F6E56;font-weight:500}
+.search-bar{background:#fff;margin:12px;border-radius:10px;display:flex;align-items:center;gap:8px;padding:10px 12px;border:0.5px solid var(--color-border-tertiary)}
+.search-bar input{border:none;outline:none;font-size:14px;flex:1;background:transparent;color:var(--color-text-primary)}
+.search-bar i{font-size:18px;color:#888}
+.scroll-content{background:var(--color-background-tertiary);padding:0 12px 80px}
+.section-label{font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-text-tertiary);margin:14px 0 8px}
+.sos-banner{background:#A32D2D;border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:4px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.sos-icon{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sos-text h3{font-size:14px;font-weight:500;color:#fff;margin-bottom:2px}
+.sos-text p{font-size:12px;color:rgba(255,255,255,0.75)}
+.sos-chevron{margin-left:auto;color:rgba(255,255,255,0.6)}
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
+.cat-item{background:var(--color-background-primary);border-radius:var(--border-radius-md);padding:10px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;border:0.5px solid var(--color-border-tertiary);cursor:pointer}
+.cat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.cat-label{font-size:10px;color:var(--color-text-secondary);text-align:center;line-height:1.3}
+.service-card{background:var(--color-background-primary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.svc-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.svc-logo{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.svc-name{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.svc-dept{font-size:12px;color:var(--color-text-secondary)}
+.svc-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500}
+.badge-open{background:#EAF3DE;color:#3B6D11}
+.badge-dist{background:#E6F1FB;color:#185FA5}
+.badge-stars{background:#FAEEDA;color:#633806;display:flex;align-items:center;gap:3px}
+.action-row{display:flex;gap:7px}
+.btn-call{flex:1;background:#0F6E56;color:#fff;border:none;border-radius:8px;padding:9px 0;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer}
+.btn-review{flex:1;background:var(--color-background-secondary);color:var(--color-text-primary);border:0.5px solid var(--color-border-secondary);border-radius:8px;padding:9px 0;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer}
+.btn-map{width:38px;height:38px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.district-bar{background:var(--color-background-primary);border-radius:var(--border-radius-md);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;border:0.5px solid var(--color-border-tertiary);margin-bottom:10px;cursor:pointer}
+.district-left{display:flex;align-items:center;gap:8px}
+.district-left span{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.district-sub{font-size:11px;color:var(--color-text-tertiary)}
+.ad-strip{background:var(--color-background-primary);border-radius:var(--border-radius-md);border:0.5px dashed var(--color-border-tertiary);padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.ad-logo{width:32px;height:32px;border-radius:7px;background:#E6F1FB;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ad-text p{font-size:12px;color:var(--color-text-secondary)}
+.ad-text span{font-size:11px;color:var(--color-text-tertiary)}
+.ad-label{margin-left:auto;font-size:9px;color:var(--color-text-tertiary);border:0.5px solid var(--color-border-tertiary);border-radius:4px;padding:2px 5px}
+.bottom-nav{position:sticky;bottom:0;background:var(--color-background-primary);border-top:0.5px solid var(--color-border-tertiary);display:flex;padding:8px 0 4px}
+.nav-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 0;cursor:pointer}
+.nav-tab i{font-size:20px;color:var(--color-text-tertiary)}
+.nav-tab.active i{color:#0F6E56}
+.nav-tab span{font-size:9px;color:var(--color-text-tertiary)}
+.nav-tab.active span{color:#0F6E56;font-weight:500}
+.review-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:6px}
+.review-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.review-avatar{width:28px;height:28px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:#0F6E56;flex-shrink:0}
+.review-name{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.review-date{font-size:11px;color:var(--color-text-tertiary);margin-left:auto}
+.review-body{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+.stars{color:#BA7517;font-size:12px;display:flex;gap:2px}
+</style>
+
+<h2 class="sr-only">LankaSeva mobile app UI — Sri Lanka government services directory with emergency contacts, reviews, and one-tap calling</h2>
+
+<div style="padding:1.5rem 0 0">
+
+<div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap">
+
+<div class="phone-shell" style="flex-shrink:0">
+  <div class="status-bar">
+    <span>9:41</span>
+    <span style="display:flex;gap:6px;align-items:center"><i class="ti ti-wifi" style="font-size:13px"></i><i class="ti ti-battery-2" style="font-size:13px"></i></span>
+  </div>
+
+  <div class="nav-header">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <h1>ලංකා සේවා</h1>
+        <p>All Sri Lanka government services</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <i class="ti ti-bell" style="font-size:20px;color:rgba(255,255,255,0.8)" aria-hidden="true"></i>
+        <i class="ti ti-user-circle" style="font-size:22px;color:rgba(255,255,255,0.8)" aria-hidden="true"></i>
+      </div>
+    </div>
+    <div class="lang-pills">
+      <div class="lang-pill active">සිංහල</div>
+      <div class="lang-pill">English</div>
+      <div class="lang-pill">தமிழ்</div>
+    </div>
+  </div>
+
+  <div style="background:#0F6E56;padding:0 12px 12px">
+    <div class="search-bar">
+      <i class="ti ti-search" aria-hidden="true"></i>
+      <input type="text" placeholder="Search services, numbers..." readonly />
+      <i class="ti ti-adjustments-horizontal" aria-hidden="true"></i>
+    </div>
+  </div>
+
+  <div class="scroll-content">
+    <div class="section-label">District</div>
+    <div class="district-bar">
+      <div class="district-left">
+        <i class="ti ti-map-pin" style="font-size:18px;color:#0F6E56" aria-hidden="true"></i>
+        <div>
+          <span>Colombo District</span>
+          <div class="district-sub">Auto-detected · tap to change</div>
+        </div>
+      </div>
+      <i class="ti ti-chevron-down" style="font-size:16px;color:var(--color-text-tertiary)" aria-hidden="true"></i>
+    </div>
+
+    <div class="section-label">Emergency</div>
+    <div class="sos-banner">
+      <div class="sos-icon"><i class="ti ti-urgent" style="font-size:22px;color:#fff" aria-hidden="true"></i></div>
+      <div class="sos-text">
+        <h3>Emergency Contacts</h3>
+        <p>Police · Fire · Ambulance · Disaster</p>
+      </div>
+      <i class="ti ti-chevron-right sos-chevron" style="font-size:18px" aria-hidden="true"></i>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px">
+      <div style="background:#791F1F;border-radius:var(--border-radius-md);padding:12px 14px;cursor:pointer">
+        <i class="ti ti-phone-call" style="font-size:22px;color:#fff" aria-hidden="true"></i>
+        <p style="font-size:13px;font-weight:500;color:#fff;margin-top:6px">Police</p>
+        <p style="font-size:18px;font-weight:500;color:#fff">119</p>
+      </div>
+      <div style="background:#185FA5;border-radius:var(--border-radius-md);padding:12px 14px;cursor:pointer">
+        <i class="ti ti-ambulance" style="font-size:22px;color:#fff" aria-hidden="true"></i>
+        <p style="font-size:13px;font-weight:500;color:#fff;margin-top:6px">Ambulance</p>
+        <p style="font-size:18px;font-weight:500;color:#fff">110</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px">
+      <div style="background:#854F0B;border-radius:var(--border-radius-md);padding:12px 14px;cursor:pointer">
+        <i class="ti ti-flame" style="font-size:22px;color:#fff" aria-hidden="true"></i>
+        <p style="font-size:13px;font-weight:500;color:#fff;margin-top:6px">Fire</p>
+        <p style="font-size:18px;font-weight:500;color:#fff">111</p>
+      </div>
+      <div style="background:#3B6D11;border-radius:var(--border-radius-md);padding:12px 14px;cursor:pointer">
+        <i class="ti ti-alert-triangle" style="font-size:22px;color:#fff" aria-hidden="true"></i>
+        <p style="font-size:13px;font-weight:500;color:#fff;margin-top:6px">Disaster</p>
+        <p style="font-size:18px;font-weight:500;color:#fff">117</p>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:14px">Browse by category</div>
+    <div class="cat-grid">
+      <div class="cat-item">
+        <div class="cat-icon" style="background:#E1F5EE"><i class="ti ti-bolt" style="font-size:18px;color:#0F6E56" aria-hidden="true"></i></div>
+        <span class="cat-label">Electricity</span>
+      </div>
+      <div class="cat-item">
+        <div class="cat-icon" style="background:#E6F1FB"><i class="ti ti-droplet" style="font-size:18px;color:#185FA5" aria-hidden="true"></i></div>
+        <span class="cat-label">Water</span>
+      </div>
+      <div class="cat-item">
+        <div class="cat-icon" style="background:#FAEEDA"><i class="ti ti-building-hospital" style="font-size:18px;color:#854F0B" aria-hidden="true"></i></div>
+        <span class="cat-label">Hospitals</span>
+      </div>
+      <div class="cat-item">
+        <div class="cat-icon" style="background:#FCEBEB"><i class="ti ti-shield" style="font-size:18px;color:#A32D2D" aria-hidden="true"></i></div>
+        <span class="cat-label">Police</span>
+      </div>
+      <div class="cat-item">
+        <div class="cat-icon" style="background:#FBEAF0"><i class="ti ti-gavel" style="font-size:18px;color:#993556" aria-hidden="true"></i></div>
+        <span class="cat-label">Courts</span>
+      </div>
+      <div class="cat-item">
+        <div class="cat-icon" style="background:#EAF3DE"><i class="ti ti-school" style="font-size:18px;color:#3B6D11" aria-hidden="true"></i></div>
+        <span class="cat-label">Schools</span>
+      </div>
+      <div class="cat-item">
+        <div class="cat-icon" style="background:#EEEDFE"><i class="ti ti-building-bank" style="font-size:18px;color:#534AB7" aria-hidden="true"></i></div>
+        <span class="cat-label">Gov Offices</span>
+      </div>
+      <div class="cat-item">
+        <div class="cat-icon" style="background:#F1EFE8"><i class="ti ti-dots-circle-horizontal" style="font-size:18px;color:#5F5E5A" aria-hidden="true"></i></div>
+        <span class="cat-label">More</span>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:14px">Near you — Colombo</div>
+
+    <div class="service-card">
+      <div class="svc-head">
+        <div class="svc-logo" style="background:#E1F5EE"><i class="ti ti-bolt" style="font-size:20px;color:#0F6E56" aria-hidden="true"></i></div>
+        <div>
+          <div class="svc-name">CEB — Colombo Central</div>
+          <div class="svc-dept">Ceylon Electricity Board</div>
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:16px;color:var(--color-text-tertiary);margin-left:auto" aria-hidden="true"></i>
+      </div>
+      <div class="svc-meta">
+        <span class="badge badge-open">Open now</span>
+        <span class="badge badge-dist">Colombo 7</span>
+        <span class="badge badge-stars"><i class="ti ti-star-filled" style="font-size:10px;color:#BA7517"></i> 3.8 (142)</span>
+      </div>
+      <div class="action-row">
+        <div class="btn-call"><i class="ti ti-phone" style="font-size:15px"></i> Call</div>
+        <div class="btn-review"><i class="ti ti-star" style="font-size:15px"></i> Review</div>
+        <div class="btn-map"><i class="ti ti-map" style="font-size:17px;color:var(--color-text-secondary)" aria-hidden="true"></i></div>
+      </div>
+    </div>
+
+    <div class="ad-strip">
+      <div class="ad-logo"><i class="ti ti-solar-panel" style="font-size:16px;color:#185FA5" aria-hidden="true"></i></div>
+      <div class="ad-text">
+        <p style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Lanka Solar Solutions</p>
+        <span>Cut your CEB bill by 80% — free estimate</span>
+      </div>
+      <div class="ad-label">Ad</div>
+    </div>
+
+    <div class="service-card">
+      <div class="svc-head">
+        <div class="svc-logo" style="background:#E6F1FB"><i class="ti ti-droplet" style="font-size:20px;color:#185FA5" aria-hidden="true"></i></div>
+        <div>
+          <div class="svc-name">NWSDB — Colombo</div>
+          <div class="svc-dept">National Water Supply</div>
+        </div>
+        <i class="ti ti-chevron-right" style="font-size:16px;color:var(--color-text-tertiary);margin-left:auto" aria-hidden="true"></i>
+      </div>
+      <div class="svc-meta">
+        <span class="badge badge-open">Open now</span>
+        <span class="badge badge-dist">Maligawatta</span>
+        <span class="badge badge-stars"><i class="ti ti-star-filled" style="font-size:10px;color:#BA7517"></i> 2.9 (87)</span>
+      </div>
+      <div class="action-row">
+        <div class="btn-call"><i class="ti ti-phone" style="font-size:15px"></i> Call</div>
+        <div class="btn-review"><i class="ti ti-star" style="font-size:15px"></i> Review</div>
+        <div class="btn-map"><i class="ti ti-map" style="font-size:17px;color:var(--color-text-secondary)" aria-hidden="true"></i></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav">
+    <div class="nav-tab active">
+      <i class="ti ti-home" aria-hidden="true"></i>
+      <span>Home</span>
+    </div>
+    <div class="nav-tab">
+      <i class="ti ti-search" aria-hidden="true"></i>
+      <span>Search</span>
+    </div>
+    <div class="nav-tab">
+      <i class="ti ti-map-2" aria-hidden="true"></i>
+      <span>Map</span>
+    </div>
+    <div class="nav-tab">
+      <i class="ti ti-star" aria-hidden="true"></i>
+      <span>Reviews</span>
+    </div>
+    <div class="nav-tab">
+      <i class="ti ti-user" aria-hidden="true"></i>
+      <span>Profile</span>
+    </div>
+  </div>
+</div>
+
+<div style="flex:1;min-width:240px">
+  <p style="font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-text-tertiary);margin-bottom:10px">Service detail view</p>
+
+  <div style="border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-primary);margin-bottom:16px">
+    <div style="background:#0F6E56;padding:14px 16px;display:flex;align-items:center;gap:10px">
+      <div style="width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center">
+        <i class="ti ti-bolt" style="font-size:22px;color:#fff" aria-hidden="true"></i>
+      </div>
+      <div>
+        <p style="font-size:15px;font-weight:500;color:#fff">CEB — Colombo Central</p>
+        <p style="font-size:12px;color:rgba(255,255,255,0.75)">Ceylon Electricity Board</p>
+      </div>
+    </div>
+    <div style="padding:12px 14px">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <div style="flex:1;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px;text-align:center">
+          <p style="font-size:11px;color:var(--color-text-tertiary)">Rating</p>
+          <p style="font-size:18px;font-weight:500;color:#BA7517">3.8</p>
+          <div style="display:flex;justify-content:center;gap:2px;font-size:11px;color:#BA7517">★★★★☆</div>
+        </div>
+        <div style="flex:1;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px;text-align:center">
+          <p style="font-size:11px;color:var(--color-text-tertiary)">Reviews</p>
+          <p style="font-size:18px;font-weight:500;color:var(--color-text-primary)">142</p>
+          <p style="font-size:11px;color:var(--color-text-tertiary)">public</p>
+        </div>
+        <div style="flex:1;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px;text-align:center">
+          <p style="font-size:11px;color:var(--color-text-tertiary)">Status</p>
+          <p style="font-size:12px;font-weight:500;color:#3B6D11;margin-top:4px">Open</p>
+          <p style="font-size:11px;color:var(--color-text-tertiary)">8am–5pm</p>
+        </div>
+      </div>
+      <div style="border-top:0.5px solid var(--color-border-tertiary);padding-top:10px;margin-bottom:10px">
+        <table style="width:100%;font-size:13px">
+          <tr><td style="color:var(--color-text-tertiary);padding:4px 0;display:flex;align-items:center;gap:6px"><i class="ti ti-phone" style="font-size:14px" aria-hidden="true"></i>Hotline</td><td style="text-align:right;color:#0F6E56;font-weight:500;padding:4px 0">1987</td></tr>
+          <tr><td style="color:var(--color-text-tertiary);padding:4px 0;display:flex;align-items:center;gap:6px"><i class="ti ti-phone" style="font-size:14px" aria-hidden="true"></i>Faults</td><td style="text-align:right;color:#0F6E56;font-weight:500;padding:4px 0">011-2-440-000</td></tr>
+          <tr><td style="color:var(--color-text-tertiary);padding:4px 0;display:flex;align-items:center;gap:6px"><i class="ti ti-map-pin" style="font-size:14px" aria-hidden="true"></i>Address</td><td style="text-align:right;color:var(--color-text-secondary);padding:4px 0">385 Bauddhaloka Mw</td></tr>
+          <tr><td style="color:var(--color-text-tertiary);padding:4px 0;display:flex;align-items:center;gap:6px"><i class="ti ti-clock" style="font-size:14px" aria-hidden="true"></i>Hours</td><td style="text-align:right;color:var(--color-text-secondary);padding:4px 0">Mon–Fri 8am–5pm</td></tr>
+        </table>
+      </div>
+      <div style="display:flex;gap:7px">
+        <div class="btn-call" style="flex:2"><i class="ti ti-phone" style="font-size:15px"></i> Call 1987</div>
+        <div class="btn-map" style="flex:none;width:38px"><i class="ti ti-map" style="font-size:17px;color:var(--color-text-secondary)" aria-hidden="true"></i></div>
+        <div class="btn-map" style="flex:none;width:38px"><i class="ti ti-share" style="font-size:17px;color:var(--color-text-secondary)" aria-hidden="true"></i></div>
+      </div>
+    </div>
+    <div style="border-top:0.5px solid var(--color-border-tertiary);padding:12px 14px">
+      <p style="font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:8px">Recent reviews</p>
+      <div class="review-card">
+        <div class="review-top">
+          <div class="review-avatar">AK</div>
+          <span class="review-name">Anura K.</span>
+          <div style="display:flex;gap:1px;font-size:11px;color:#BA7517;margin-left:6px">★★★★☆</div>
+          <span class="review-date">3 days ago</span>
+        </div>
+        <p class="review-body">Power cut reported at 8am — restored by 11am. Staff helpful on hotline.</p>
+      </div>
+      <div class="review-card">
+        <div class="review-top">
+          <div class="review-avatar">PM</div>
+          <span class="review-name">Priya M.</span>
+          <div style="display:flex;gap:1px;font-size:11px;color:#BA7517;margin-left:6px">★★★☆☆</div>
+          <span class="review-date">1 week ago</span>
+        </div>
+        <p class="review-body">Long wait at office. Bill dispute took 3 visits to resolve. Hotline quicker.</p>
+      </div>
+      <div style="background:#0F6E56;color:#fff;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;margin-top:8px">
+        <i class="ti ti-star" style="font-size:15px"></i> Write a review
+      </div>
+    </div>
+  </div>
+
+  <p style="font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--color-text-tertiary);margin-bottom:10px">Ad placement (contextual)</p>
+  <div class="ad-strip" style="border:0.5px dashed var(--color-border-secondary)">
+    <div class="ad-logo" style="background:#FAEEDA"><i class="ti ti-solar-panel" style="font-size:16px;color:#854F0B" aria-hidden="true"></i></div>
+    <div class="ad-text">
+      <p style="font-size:13px;font-weight:500;color:var(--color-text-primary)">SolarMax Lanka</p>
+      <span>Install solar — pay 0 upfront. LKR 500/day target.</span>
+    </div>
+    <div class="ad-label">Ad</div>
+  </div>
+  <p style="font-size:11px;color:var(--color-text-tertiary);margin-top:6px">Shown to users browsing electricity category. LKR 500/day minimum buy.</p>
+
+</div>
+</div>
+</div>
