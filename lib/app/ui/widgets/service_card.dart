@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/app_controller.dart';
+import '../../controllers/directory_controller.dart';
 import '../../controllers/review_controller.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
@@ -99,8 +100,10 @@ class ServiceCard extends StatelessWidget {
                                         isOpen ? c.success : c.emergency)),
                           ),
                           const SizedBox(width: AppDimens.space2),
+                          // Live distance: real GPS distance once a fix
+                          // exists, seeded estimate before that.
                           Text(
-                              '${service.distanceKm.toStringAsFixed(1)} km',
+                              '${Get.find<DirectoryController>().distanceOf(service).toStringAsFixed(1)} km',
                               style: AppTextStyles.caption
                                   .copyWith(color: c.textTertiary)),
                         ],

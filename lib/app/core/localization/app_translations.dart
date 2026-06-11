@@ -170,6 +170,15 @@ class AppTranslations extends Translations {
     'rate_app': 'Rate LankaSeva on Play Store',
     'report_bug': 'Report a bug',
     'cleared': 'Cleared',
+    // Location permissions
+    'open_settings': 'Open settings',
+    'location_services_off':
+        'Location is turned off on this device. Turn it on to detect your district automatically.',
+    'location_denied':
+        'Location permission was denied. You can still pick your district manually.',
+    'location_denied_forever':
+        'Location permission is blocked. Allow it in app settings to use auto-detection.',
+    'my_location': 'My location',
     // Tabs
     'tab_home': 'Home',
     'tab_search': 'Search',
@@ -318,6 +327,14 @@ class AppTranslations extends Translations {
     'rate_app': 'Play Store හි LankaSeva ඇගයීම් කරන්න',
     'report_bug': 'දෝෂයක් වාර්තා කරන්න',
     'cleared': 'මකා දමන ලදී',
+    'open_settings': 'සැකසුම් විවෘත කරන්න',
+    'location_services_off':
+        'මෙම උපාංගයේ ස්ථානය අක්‍රියයි. දිස්ත්‍රික්කය ස්වයංක්‍රීයව හඳුනා ගැනීමට එය සක්‍රිය කරන්න.',
+    'location_denied':
+        'ස්ථාන අවසරය ප්‍රතික්ෂේප විය. ඔබට දිස්ත්‍රික්කය අතින් තෝරාගත හැක.',
+    'location_denied_forever':
+        'ස්ථාන අවසරය අවහිර කර ඇත. ස්වයං හඳුනාගැනීමට යෙදුම් සැකසුම් තුළ එය ඉඩ දෙන්න.',
+    'my_location': 'මගේ ස්ථානය',
     'tab_home': 'මුල',
     'tab_search': 'සොයන්න',
     'tab_map': 'සිතියම',
@@ -464,6 +481,14 @@ class AppTranslations extends Translations {
     'rate_app': 'Play Store இல் LankaSeva ஐ மதிப்பிடுங்கள்',
     'report_bug': 'பிழையைப் புகாரளி',
     'cleared': 'அழிக்கப்பட்டது',
+    'open_settings': 'அமைப்புகளைத் திற',
+    'location_services_off':
+        'இந்த சாதனத்தில் இருப்பிடம் முடக்கப்பட்டுள்ளது. மாவட்டத்தை தானாகக் கண்டறிய அதை இயக்கவும்.',
+    'location_denied':
+        'இருப்பிட அனுமதி மறுக்கப்பட்டது. மாவட்டத்தை கைமுறையாகத் தேர்ந்தெடுக்கலாம்.',
+    'location_denied_forever':
+        'இருப்பிட அனுமதி தடுக்கப்பட்டுள்ளது. தானியங்கி கண்டறிதலுக்கு ஆப் அமைப்புகளில் அனுமதிக்கவும்.',
+    'my_location': 'என் இருப்பிடம்',
     'tab_home': 'முகப்பு',
     'tab_search': 'தேடு',
     'tab_map': 'வரைபடம்',

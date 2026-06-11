@@ -1,4 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Internet: OpenStreetMap tile downloads + future API sync. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Location: "Use my location" district detection and map blue-dot.
+         Both fine and coarse are declared; the app requests medium accuracy
+         (district-level), so users may grant approximate-only on Android 12+. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- One-tap calling hands off to the dialer (no CALL_PHONE needed). -->
     <application
         android:label="lankaseva"
         android:name="${applicationName}"

@@ -117,41 +117,53 @@ const List<CategoryMeta> kCategories = [
 CategoryMeta categoryMeta(ServiceCategory id) =>
     kCategories.firstWhere((c) => c.id == id);
 
-/// A Sri Lankan district with its parent province (spec 4.4 — all 25).
+/// A Sri Lankan district with its parent province and the real-world
+/// coordinates of its administrative capital (spec 4.4 — all 25). The
+/// coordinates anchor service map pins and power GPS district detection.
 class District {
   final String name;
   final String province;
-  const District(this.name, this.province);
+  final double lat;
+  final double lng;
+  const District(this.name, this.province, this.lat, this.lng);
 }
 
-/// All 25 districts grouped by province, in spec order.
+/// All 25 districts grouped by province with district-capital coordinates.
 const List<District> kDistricts = [
-  District('Colombo', 'Western'),
-  District('Gampaha', 'Western'),
-  District('Kalutara', 'Western'),
-  District('Kandy', 'Central'),
-  District('Matale', 'Central'),
-  District('Nuwara Eliya', 'Central'),
-  District('Galle', 'Southern'),
-  District('Matara', 'Southern'),
-  District('Hambantota', 'Southern'),
-  District('Jaffna', 'Northern'),
-  District('Kilinochchi', 'Northern'),
-  District('Mannar', 'Northern'),
-  District('Mullaitivu', 'Northern'),
-  District('Vavuniya', 'Northern'),
-  District('Batticaloa', 'Eastern'),
-  District('Ampara', 'Eastern'),
-  District('Trincomalee', 'Eastern'),
-  District('Kurunegala', 'North Western'),
-  District('Puttalam', 'North Western'),
-  District('Anuradhapura', 'North Central'),
-  District('Polonnaruwa', 'North Central'),
-  District('Badulla', 'Uva'),
-  District('Monaragala', 'Uva'),
-  District('Ratnapura', 'Sabaragamuwa'),
-  District('Kegalle', 'Sabaragamuwa'),
+  District('Colombo', 'Western', 6.9271, 79.8612),
+  District('Gampaha', 'Western', 7.0917, 79.9999),
+  District('Kalutara', 'Western', 6.5854, 79.9607),
+  District('Kandy', 'Central', 7.2906, 80.6337),
+  District('Matale', 'Central', 7.4675, 80.6234),
+  District('Nuwara Eliya', 'Central', 6.9497, 80.7891),
+  District('Galle', 'Southern', 6.0535, 80.2210),
+  District('Matara', 'Southern', 5.9549, 80.5550),
+  District('Hambantota', 'Southern', 6.1429, 81.1212),
+  District('Jaffna', 'Northern', 9.6615, 80.0255),
+  District('Kilinochchi', 'Northern', 9.3803, 80.3770),
+  District('Mannar', 'Northern', 8.9810, 79.9044),
+  District('Mullaitivu', 'Northern', 9.2671, 80.8142),
+  District('Vavuniya', 'Northern', 8.7514, 80.4971),
+  District('Batticaloa', 'Eastern', 7.7170, 81.7000),
+  District('Ampara', 'Eastern', 7.2975, 81.6820),
+  District('Trincomalee', 'Eastern', 8.5874, 81.2152),
+  District('Kurunegala', 'North Western', 7.4818, 80.3609),
+  District('Puttalam', 'North Western', 8.0362, 79.8283),
+  District('Anuradhapura', 'North Central', 8.3114, 80.4037),
+  District('Polonnaruwa', 'North Central', 7.9403, 81.0188),
+  District('Badulla', 'Uva', 6.9934, 81.0550),
+  District('Monaragala', 'Uva', 6.8714, 81.3487),
+  District('Ratnapura', 'Sabaragamuwa', 6.7056, 80.3847),
+  District('Kegalle', 'Sabaragamuwa', 7.2513, 80.3464),
 ];
+
+/// Looks up a district by name (returns null when unknown).
+District? districtByName(String name) {
+  for (final d in kDistricts) {
+    if (d.name == name) return d;
+  }
+  return null;
+}
 
 /// A national emergency hotline tile (spec 4.6 — Number Tiles table).
 class EmergencyContact {

@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'app/controllers/app_controller.dart';
 import 'app/controllers/auth_controller.dart';
 import 'app/controllers/directory_controller.dart';
+import 'app/controllers/geocoding_controller.dart';
+import 'app/controllers/location_controller.dart';
 import 'app/controllers/review_controller.dart';
 import 'app/controllers/search_controller.dart';
 import 'app/core/localization/app_translations.dart';
@@ -25,11 +27,14 @@ Future<void> main() async {
   final app = Get.put(AppController(), permanent: true);
   final auth = Get.put(AuthController(), permanent: true);
   final reviews = Get.put(ReviewController(), permanent: true);
+  Get.put(LocationController(), permanent: true);
+  final geocoder = Get.put(GeocodingController(), permanent: true);
   Get.put(DirectoryController(), permanent: true);
   final search = Get.put(ServiceSearchController(), permanent: true);
 
   // Load persisted state before the first frame (no flash of defaults).
-  await Future.wait([app.init(), auth.init(), reviews.init(), search.init()]);
+  await Future.wait(
+      [app.init(), auth.init(), reviews.init(), search.init(), geocoder.init()]);
 
   runApp(LankaSevaApp(initialLanguage: app.language.value));
 }

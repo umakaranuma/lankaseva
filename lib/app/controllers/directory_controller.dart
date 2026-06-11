@@ -4,6 +4,8 @@ import '../core/constants/app_constants.dart';
 import '../data/models/service_model.dart';
 import '../data/sources/service_data_source.dart';
 import 'app_controller.dart';
+import 'geocoding_controller.dart';
+import 'location_controller.dart';
 import 'review_controller.dart';
 
 /// Sort options for category listings (spec 4.7 — Sort bar).
@@ -33,6 +35,11 @@ class DirectoryController extends GetxController {
 
   AppController get _app => Get.find<AppController>();
   ReviewController get _reviews => Get.find<ReviewController>();
+  LocationController get _location => Get.find<LocationController>();
+
+  /// Real distance from the user when a GPS fix exists, seeded estimate
+  /// otherwise — single distance rule for all sorting and labels.
+  double distanceOf(Service s) => _location.distanceTo(s);
 
   // -------------------------------------------------------------------
   // Home
@@ -44,7 +51,7 @@ class DirectoryController extends GetxController {
     final list = ServiceDataSource.services
         .where((s) => s.district == _app.district.value)
         .toList()
-      ..sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
+      ..sort((a, b) => distanceOf(a).compareTo(distanceOf(b)));
     return list.take(limit).toList();
   }
 
@@ -72,7 +79,7 @@ class DirectoryController extends GetxController {
 
     switch (sort.value) {
       case ServiceSort.nearest:
-        list.sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
+        list.sort((a, b) => distanceOf(a).compareTo(distanceOf(b)));
       case ServiceSort.topRated:
         list.sort((a, b) =>
             _reviews.averageFor(b.id).compareTo(_reviews.averageFor(a.id)));
@@ -82,7 +89,7 @@ class DirectoryController extends GetxController {
       case ServiceSort.openNow:
         final now = DateTime.now();
         list = list.where((s) => s.hours.isOpenAt(now)).toList()
-          ..sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
+          ..sort((a, b) => distanceOf(a).compareTo(distanceOf(b)));
     }
     return list;
   }
@@ -104,11 +111,21 @@ class DirectoryController extends GetxController {
           s.district == _app.district.value &&
           (mapCategory.value == null || s.category == mapCategory.value))
       .toList()
-    ..sort((a, b) => a.distanceKm.compareTo(b.distanceKm));
+    ..sort((a, b) => distanceOf(a).compareTo(distanceOf(b)));
 
   // -------------------------------------------------------------------
   // Shared actions
   // -------------------------------------------------------------------
+
+  /// Opens the platform map app pointed at the service's EXACT position
+  /// (geocoded coordinates when resolved, seeded estimate otherwise).
+  /// Also queues a geocode lookup so repeat opens get more accurate.
+  void openServiceMap(Service s) {
+    final geocoder = Get.find<GeocodingController>();
+    geocoder.ensureResolved([s]);
+    final (lat, lng) = geocoder.positionOf(s);
+    _app.openMap(lat, lng, s.name.of(_app.language.value));
+  }
 
   /// Builds the shareable text block for a service (spec 5.3 — Service
   /// sharing) and hands it to the platform share action.

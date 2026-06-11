@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/app_controller.dart';
+import '../../controllers/location_controller.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
@@ -54,18 +55,32 @@ class _DistrictScreenState extends State<DistrictScreen> {
               padding: const EdgeInsets.all(AppDimens.space4),
               child: Column(
                 children: [
-                  // Auto-detect (GPS reverse-geocode in production; here it
-                  // demonstrates the flow by selecting Colombo).
+                  // GPS auto-detect: LocationController runs the full
+                  // permission flow (ask → denied → blocked → settings),
+                  // gets a fix and applies the nearest district. The flow
+                  // only continues when detection actually succeeded.
                   SizedBox(
                     width: double.infinity,
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.my_location, size: 18),
-                      label: Text('use_my_location'.tr),
-                      onPressed: () {
-                        app.changeDistrict('Colombo');
-                        _confirm(app);
-                      },
-                    ),
+                    child: Obx(() {
+                      final location = Get.find<LocationController>();
+                      return OutlinedButton.icon(
+                        icon: location.isLocating.value
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2))
+                            : const Icon(Icons.my_location, size: 18),
+                        label: Text('use_my_location'.tr),
+                        onPressed: location.isLocating.value
+                            ? null
+                            : () async {
+                                final ok = await location
+                                    .detectAndApplyDistrict();
+                                if (ok) _confirm(app);
+                              },
+                      );
+                    }),
                   ),
                   const SizedBox(height: AppDimens.space3),
                   // District search filter.

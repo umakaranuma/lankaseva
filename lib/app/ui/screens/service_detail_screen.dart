@@ -161,8 +161,7 @@ class ServiceDetailScreen extends StatelessWidget {
                       subtitle: Text(service.address.of(lang),
                           style: AppTextStyles.bodySm
                               .copyWith(color: c.textPrimary)),
-                      onTap: () => app.openMap(
-                          service.lat, service.lng, service.name.of(lang)),
+                      onTap: () => directory.openServiceMap(service),
                     ),
                     if (service.website != null)
                       ListTile(
@@ -231,8 +230,8 @@ class ServiceDetailScreen extends StatelessWidget {
                     const SizedBox(width: AppDimens.space2),
                     IconButton.outlined(
                         icon: const Icon(Icons.map_outlined),
-                        onPressed: () => app.openMap(service.lat,
-                            service.lng, service.name.of(lang))),
+                        onPressed: () =>
+                            directory.openServiceMap(service)),
                     IconButton.outlined(
                         icon: const Icon(Icons.share_outlined),
                         onPressed: () => directory.shareService(service)),

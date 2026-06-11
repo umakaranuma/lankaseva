@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Location: shown in the iOS permission dialog when the user taps
+	     "Use my location" (district auto-detection + map position). -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>LankaSeva uses your location to detect your district and show government services near you.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
