@@ -9,6 +9,7 @@ import '../../core/theme/app_dimens.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../data/sources/service_data_source.dart';
 import '../../routes/app_pages.dart';
+import '../widgets/app_sheets.dart';
 import '../widgets/common_widgets.dart';
 
 /// ---------------------------------------------------------------------------
@@ -21,23 +22,17 @@ import '../widgets/common_widgets.dart';
 class MyReviewsScreen extends StatelessWidget {
   const MyReviewsScreen({super.key});
 
-  /// Confirms before deleting a review (destructive action).
-  void _confirmDelete(ReviewController reviews, String reviewId) {
-    Get.dialog(AlertDialog(
-      title: Text('delete'.tr),
-      content: Text('delete_review_confirm'.tr),
-      actions: [
-        TextButton(onPressed: Get.back, child: Text('cancel'.tr)),
-        FilledButton(
-          style: FilledButton.styleFrom(backgroundColor: Colors.red),
-          onPressed: () {
-            reviews.deleteReview(reviewId);
-            Get.back();
-          },
-          child: Text('delete'.tr),
-        ),
-      ],
-    ));
+  /// Confirms before deleting a review via the destructive bottom sheet.
+  Future<void> _confirmDelete(
+      ReviewController reviews, String reviewId) async {
+    final ok = await showConfirmSheet(
+      title: 'delete'.tr,
+      message: 'delete_review_confirm'.tr,
+      confirmLabel: 'delete'.tr,
+      icon: Icons.delete_outline,
+      destructive: true,
+    );
+    if (ok) reviews.deleteReview(reviewId);
   }
 
   @override

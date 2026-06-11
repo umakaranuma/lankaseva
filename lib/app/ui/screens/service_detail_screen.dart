@@ -418,10 +418,12 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
                   // ---- Report incorrect info ----
                   Center(
-                    child: TextButton(
+                    child: TextButton.icon(
                       onPressed: () =>
                           directory.reportIncorrectInfo(service),
-                      child: Text('report_info'.tr,
+                      icon: Icon(Icons.flag_outlined,
+                          size: 16, color: c.textTertiary),
+                      label: Text('report_info'.tr,
                           style: AppTextStyles.caption
                               .copyWith(color: c.textTertiary)),
                     ),

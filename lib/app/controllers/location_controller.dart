@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../core/constants/app_constants.dart';
 import '../data/models/service_model.dart';
 import '../data/sources/route_service.dart';
+import '../ui/widgets/app_sheets.dart';
 import 'app_controller.dart';
 import 'geocoding_controller.dart';
 
@@ -80,25 +81,19 @@ class LocationController extends GetxController {
     return true; // whileInUse or always
   }
 
-  /// Small reusable confirm dialog for the permission guidance prompts.
+  /// Permission guidance prompt, shown as a bottom sheet (app rule:
+  /// no popup dialogs anywhere).
   Future<bool> _askUser({
     required String title,
     required String message,
     required String actionLabel,
-  }) async {
-    final result = await Get.dialog<bool>(AlertDialog(
-      title: Text(title),
-      content: Text(message),
-      actions: [
-        TextButton(
-            onPressed: () => Get.back(result: false),
-            child: Text('cancel'.tr)),
-        FilledButton(
-            onPressed: () => Get.back(result: true),
-            child: Text(actionLabel)),
-      ],
-    ));
-    return result == true;
+  }) {
+    return showConfirmSheet(
+      title: title,
+      message: message,
+      confirmLabel: actionLabel,
+      icon: Icons.location_on_outlined,
+    );
   }
 
   // -------------------------------------------------------------------

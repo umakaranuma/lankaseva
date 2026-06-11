@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../ui/screens/about_screen.dart';
 import '../ui/screens/category_list_screen.dart';
 import '../ui/screens/district_screen.dart';
+import '../ui/screens/edit_profile_screen.dart';
 import '../ui/screens/emergency_screen.dart';
 import '../ui/screens/language_screen.dart';
 import '../ui/screens/login_screen.dart';
@@ -10,6 +11,9 @@ import '../ui/screens/main_shell.dart';
 import '../ui/screens/my_reviews_screen.dart';
 import '../ui/screens/notifications_screen.dart';
 import '../ui/screens/onboarding_screen.dart';
+import '../ui/screens/report_bug_screen.dart';
+import '../ui/screens/report_info_screen.dart';
+import '../ui/screens/saved_services_screen.dart';
 import '../ui/screens/service_detail_screen.dart';
 import '../ui/screens/service_map_screen.dart';
 import '../ui/screens/settings_screen.dart';
@@ -36,6 +40,10 @@ abstract class Routes {
   static const settings = '/settings';
   static const notifications = '/notifications';
   static const myReviews = '/my-reviews';
+  static const savedServices = '/saved-services';
+  static const editProfile = '/edit-profile';
+  static const reportInfo = '/report-info'; // arguments: Service
+  static const reportBug = '/report-bug';
   static const about = '/about';
 }
 
@@ -59,6 +67,11 @@ class AppPages {
     GetPage(
         name: Routes.notifications, page: () => const NotificationsScreen()),
     GetPage(name: Routes.myReviews, page: () => const MyReviewsScreen()),
+    GetPage(
+        name: Routes.savedServices, page: () => const SavedServicesScreen()),
+    GetPage(name: Routes.editProfile, page: () => const EditProfileScreen()),
+    GetPage(name: Routes.reportInfo, page: () => const ReportInfoScreen()),
+    GetPage(name: Routes.reportBug, page: () => const ReportBugScreen()),
     GetPage(name: Routes.about, page: () => const AboutScreen()),
   ];
 }

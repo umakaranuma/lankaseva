@@ -151,10 +151,9 @@ class DirectoryController extends GetxController {
         '— ${AppInfo.appNameLatin}');
   }
 
-  /// Submits an incorrect-info report for a service. With no backend this
-  /// simply acknowledges; production would POST /report/:serviceId.
+  /// Opens the full "Report incorrect info" form for a service (spec 5.3).
   void reportIncorrectInfo(Service s) =>
-      Get.rawSnackbar(message: 'report_sent'.tr);
+      Get.toNamed(Routes.reportInfo, arguments: s);
 
   /// Acknowledges a "suggest a service" submission (POST /suggest in prod).
   void suggestService() => Get.rawSnackbar(message: 'report_sent'.tr);

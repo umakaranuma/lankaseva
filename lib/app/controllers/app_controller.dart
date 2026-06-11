@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../data/models/service_model.dart';
 import '../data/sources/service_data_source.dart';
 import '../routes/app_pages.dart';
+import '../ui/widgets/app_sheets.dart';
 
 /// ---------------------------------------------------------------------------
 /// AppController
@@ -173,22 +174,16 @@ class AppController extends GetxController {
   // Device actions (shared by every screen)
   // -------------------------------------------------------------------
 
-  /// One-tap calling with the mandatory confirm dialog (spec 4.5 / 4.6):
-  /// shows "Call [number]?" then hands off to the platform dialer.
+  /// One-tap calling with the mandatory confirmation (spec 4.5 / 4.6),
+  /// presented as a bottom sheet (app rule: no popup dialogs), then hands
+  /// off to the platform dialer.
   Future<void> callNumber(String number) async {
-    final confirmed = await Get.dialog<bool>(
-      AlertDialog(
-        title: Text('call_number'.trParams({'number': number})),
-        actions: [
-          TextButton(
-              onPressed: () => Get.back(result: false),
-              child: Text('cancel'.tr)),
-          FilledButton(
-              onPressed: () => Get.back(result: true), child: Text('yes'.tr)),
-        ],
-      ),
+    final confirmed = await showConfirmSheet(
+      title: 'call_number'.trParams({'number': number}),
+      confirmLabel: 'call'.tr,
+      icon: Icons.phone,
     );
-    if (confirmed == true) {
+    if (confirmed) {
       final uri = Uri(scheme: 'tel', path: number);
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri);

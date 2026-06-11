@@ -7,6 +7,7 @@ import 'app/controllers/directory_controller.dart';
 import 'app/controllers/geocoding_controller.dart';
 import 'app/controllers/location_controller.dart';
 import 'app/controllers/notification_controller.dart';
+import 'app/controllers/report_controller.dart';
 import 'app/controllers/review_controller.dart';
 import 'app/controllers/search_controller.dart';
 import 'app/core/localization/app_translations.dart';
@@ -33,6 +34,7 @@ Future<void> main() async {
   Get.put(DirectoryController(), permanent: true);
   final search = Get.put(ServiceSearchController(), permanent: true);
   final notifications = Get.put(NotificationController(), permanent: true);
+  Get.put(ReportController(), permanent: true);
 
   // Load persisted state before the first frame (no flash of defaults).
   await Future.wait([
