@@ -6,6 +6,7 @@ import '../core/constants/app_constants.dart';
 import '../data/models/service_model.dart';
 import '../data/sources/route_service.dart';
 import '../ui/widgets/app_sheets.dart';
+import '../ui/widgets/common_widgets.dart';
 import 'app_controller.dart';
 import 'geocoding_controller.dart';
 
@@ -74,7 +75,7 @@ class LocationController extends GetxController {
     }
 
     if (permission == LocationPermission.denied) {
-      Get.rawSnackbar(message: 'location_denied'.tr);
+      AppToast.show('location_denied'.tr);
       return false;
     }
 
@@ -136,9 +137,7 @@ class LocationController extends GetxController {
     if (fix == null) return false;
     final district = nearestDistrict(fix.latitude, fix.longitude);
     Get.find<AppController>().changeDistrict(district.name);
-    Get.rawSnackbar(
-        message: '${district.name} ${'district'.tr}',
-        duration: const Duration(seconds: 2));
+    AppToast.show('${district.name} ${'district'.tr}');
     return true;
   }
 

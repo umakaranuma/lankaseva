@@ -7,6 +7,7 @@ import '../data/models/review_model.dart';
 import '../data/sources/service_data_source.dart';
 import 'app_controller.dart';
 import 'auth_controller.dart';
+import '../ui/widgets/common_widgets.dart';
 
 /// ---------------------------------------------------------------------------
 /// ReviewController
@@ -238,7 +239,7 @@ class ReviewController extends GetxController {
   /// Increments the helpful counter on a review (requires login per spec).
   void markHelpful(Review review) {
     if (!Get.find<AuthController>().isLoggedIn) {
-      Get.rawSnackbar(message: 'login_required'.tr);
+      AppToast.show('login_required'.tr);
       return;
     }
     review.helpfulCount++;

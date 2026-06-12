@@ -35,9 +35,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
     final reviews = Get.find<ReviewController>();
     if (reviews.submitReview(service.id)) {
       Get.back();
-      Get.rawSnackbar(
-          message: 'review_submitted'.tr,
-          duration: const Duration(seconds: 3));
+      AppToast.show('review_submitted'.tr);
     }
   }
 

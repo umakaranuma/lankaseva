@@ -62,7 +62,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (name.length < 2) return; // Button is disabled in this state anyway
     auth.updateDisplayName(name);
     Get.back();
-    Get.rawSnackbar(message: 'profile_saved'.tr);
+    AppToast.show('profile_saved'.tr);
   }
 
   @override

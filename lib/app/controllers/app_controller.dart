@@ -8,6 +8,7 @@ import '../data/models/service_model.dart';
 import '../data/sources/service_data_source.dart';
 import '../routes/app_pages.dart';
 import '../ui/widgets/app_sheets.dart';
+import '../ui/widgets/common_widgets.dart';
 
 /// ---------------------------------------------------------------------------
 /// AppController
@@ -216,6 +217,6 @@ class AppController extends GetxController {
 
   /// Lightweight bottom snackbar used for all feedback toasts.
   void _toast(String message) {
-    Get.rawSnackbar(message: message, duration: const Duration(seconds: 2));
+    AppToast.show(message);
   }
 }

@@ -24,8 +24,10 @@ class SectionLabel extends StatelessWidget {
     final c = AppColors.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: AppDimens.space2),
-      child: Text(text.toUpperCase(),
-          style: AppTextStyles.sectionLabel.copyWith(color: c.textTertiary)),
+      child: Text(
+        text.toUpperCase(),
+        style: AppTextStyles.sectionLabel.copyWith(color: c.textTertiary),
+      ),
     );
   }
 }
@@ -48,8 +50,8 @@ class StarRow extends StatelessWidget {
           filled
               ? Icons.star
               : half
-                  ? Icons.star_half
-                  : Icons.star_border,
+              ? Icons.star_half
+              : Icons.star_border,
           size: size,
           color: c.star,
         );
@@ -71,13 +73,15 @@ class InitialsAvatar extends StatelessWidget {
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration:
-          BoxDecoration(color: c.primaryLight, shape: BoxShape.circle),
-      child: Text(initials,
-          style: TextStyle(
-              color: c.primary,
-              fontWeight: FontWeight.w600,
-              fontSize: size * 0.36)),
+      decoration: BoxDecoration(color: c.primaryLight, shape: BoxShape.circle),
+      child: Text(
+        initials,
+        style: TextStyle(
+          color: c.primary,
+          fontWeight: FontWeight.w600,
+          fontSize: size * 0.36,
+        ),
+      ),
     );
   }
 }
@@ -103,8 +107,12 @@ class UserAvatar extends StatelessWidget {
       return InitialsAvatar(initials: initials, size: size);
     }
     return ClipOval(
-      child: Image.file(File(path),
-          width: size, height: size, fit: BoxFit.cover),
+      child: Image.file(
+        File(path),
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+      ),
     );
   }
 }
@@ -118,39 +126,49 @@ class DistrictChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final app = Get.find<AppController>();
     final c = AppColors.of(context);
-    return Obx(() => InkWell(
-          borderRadius: BorderRadius.circular(AppDimens.radiusMd),
-          onTap: () => Get.toNamed(Routes.districtSelect),
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppDimens.space3, vertical: AppDimens.space2),
-            decoration: BoxDecoration(
-              color: c.bgCard,
-              borderRadius: BorderRadius.circular(AppDimens.radiusMd),
-              border: Border.all(color: c.borderLight),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.location_on_outlined, size: 18, color: c.primary),
-                const SizedBox(width: AppDimens.space2),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('${app.district.value} ${'district'.tr}',
-                          style: AppTextStyles.heading3
-                              .copyWith(color: c.textPrimary)),
-                      Text('tap_to_change'.tr,
-                          style: AppTextStyles.caption
-                              .copyWith(color: c.textTertiary)),
-                    ],
-                  ),
-                ),
-                Icon(Icons.keyboard_arrow_down, color: c.textTertiary),
-              ],
-            ),
+    return Obx(
+      () => InkWell(
+        borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+        onTap: () => Get.toNamed(Routes.districtSelect),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppDimens.space3,
+            vertical: AppDimens.space2,
           ),
-        ));
+          decoration: BoxDecoration(
+            color: c.bgCard,
+            borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+            border: Border.all(color: c.borderLight),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.location_on_outlined, size: 18, color: c.primary),
+              const SizedBox(width: AppDimens.space2),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${app.district.value} ${'district'.tr}',
+                      style: AppTextStyles.heading3.copyWith(
+                        color: c.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      'tap_to_change'.tr,
+                      style: AppTextStyles.caption.copyWith(
+                        color: c.textTertiary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.keyboard_arrow_down, color: c.textTertiary),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -186,14 +204,16 @@ class AdStrip extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(headline,
-                    style:
-                        AppTextStyles.bodySm.copyWith(color: c.textPrimary)),
-                Text(description,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style:
-                        AppTextStyles.caption.copyWith(color: c.textSecondary)),
+                Text(
+                  headline,
+                  style: AppTextStyles.bodySm.copyWith(color: c.textPrimary),
+                ),
+                Text(
+                  description,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.caption.copyWith(color: c.textSecondary),
+                ),
               ],
             ),
           ),
@@ -204,8 +224,10 @@ class AdStrip extends StatelessWidget {
               color: c.bgSecondary,
               borderRadius: BorderRadius.circular(AppDimens.radiusSm),
             ),
-            child: Text('ad'.tr,
-                style: AppTextStyles.label.copyWith(color: c.textTertiary)),
+            child: Text(
+              'ad'.tr,
+              style: AppTextStyles.label.copyWith(color: c.textTertiary),
+            ),
           ),
         ],
       ),
@@ -238,9 +260,11 @@ class EmptyState extends StatelessWidget {
           children: [
             Icon(icon, size: 44, color: c.textTertiary),
             const SizedBox(height: AppDimens.space3),
-            Text(message,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.body.copyWith(color: c.textSecondary)),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.body.copyWith(color: c.textSecondary),
+            ),
             if (ctaLabel != null) ...[
               const SizedBox(height: AppDimens.space4),
               OutlinedButton(onPressed: onCta, child: Text(ctaLabel!)),
@@ -248,6 +272,43 @@ class EmptyState extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Global floating toast utility matching the application theme.
+class AppToast {
+  static void show(String message, {bool isError = false}) {
+    final context = Get.context;
+    if (context == null) return;
+    final c = AppColors.of(context);
+    Get.rawSnackbar(
+      messageText: Text(
+        message,
+        style: AppTextStyles.body.copyWith(color: c.textPrimary),
+      ),
+      backgroundColor: c.bgCard,
+      icon: Container(
+        width: 4,
+        height: 20,
+        margin: const EdgeInsets.only(left: AppDimens.space2),
+        decoration: BoxDecoration(
+          color: isError ? c.emergency : c.primary,
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+      borderColor: isError ? c.emergency : c.primary,
+      borderWidth: 1.0,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDimens.space4,
+        vertical: AppDimens.space2,
+      ),
+      snackPosition: SnackPosition.TOP,
+      margin: const EdgeInsets.all(AppDimens.space4),
+      borderRadius: AppDimens.radiusMd,
+      duration: const Duration(seconds: 2),
+      isDismissible: true,
+      snackStyle: SnackStyle.FLOATING,
     );
   }
 }

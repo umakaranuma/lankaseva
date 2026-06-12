@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/models/user_model.dart';
+import '../ui/widgets/common_widgets.dart';
 
 /// ---------------------------------------------------------------------------
 /// AuthController
@@ -108,10 +109,7 @@ class AuthController extends GetxController {
     error.value = '';
     step.value = 1;
     _startResendCountdown();
-    // Simulated SMS delivery — replace with POST /auth/otp/send in prod.
-    Get.rawSnackbar(
-        message: 'SMS (demo): Your LankaSeva code is $_expectedOtp',
-        duration: const Duration(seconds: 6));
+    AppToast.show('SMS (demo): Your LankaSeva code is $_expectedOtp');
   }
 
   /// Re-sends the OTP once the 60-second countdown has elapsed (spec 4.13).

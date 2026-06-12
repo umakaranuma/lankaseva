@@ -41,8 +41,7 @@ class _ReportBugScreenState extends State<ReportBugScreen> {
   void _submit(ReportController report) {
     if (report.submitBug()) {
       Get.back();
-      Get.rawSnackbar(
-          message: 'report_sent'.tr, duration: const Duration(seconds: 3));
+      AppToast.show('report_sent'.tr);
     }
   }
 

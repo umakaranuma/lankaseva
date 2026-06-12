@@ -35,8 +35,7 @@ class _ReportInfoScreenState extends State<ReportInfoScreen> {
   void _submit(ReportController report) {
     if (report.submitInfoReport()) {
       Get.back();
-      Get.rawSnackbar(
-          message: 'report_sent'.tr, duration: const Duration(seconds: 3));
+      AppToast.show('report_sent'.tr);
     }
   }
 

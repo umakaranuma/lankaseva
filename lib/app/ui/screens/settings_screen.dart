@@ -310,7 +310,7 @@ class SettingsScreen extends StatelessWidget {
                 showChevron: false,
                 onTap: () {
                   search.clearHistory();
-                  Get.rawSnackbar(message: 'cleared'.tr);
+                  AppToast.show('cleared'.tr);
                 },
               ),
               _SettingsRow(

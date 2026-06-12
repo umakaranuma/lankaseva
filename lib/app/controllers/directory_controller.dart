@@ -8,6 +8,7 @@ import 'app_controller.dart';
 import 'geocoding_controller.dart';
 import 'location_controller.dart';
 import 'review_controller.dart';
+import '../ui/widgets/common_widgets.dart';
 
 /// Sort options for category listings (spec 4.7 — Sort bar).
 enum ServiceSort { nearest, topRated, mostReviewed, openNow }
@@ -156,5 +157,5 @@ class DirectoryController extends GetxController {
       Get.toNamed(Routes.reportInfo, arguments: s);
 
   /// Acknowledges a "suggest a service" submission (POST /suggest in prod).
-  void suggestService() => Get.rawSnackbar(message: 'report_sent'.tr);
+  void suggestService() => AppToast.show('report_sent'.tr);
 }
