@@ -125,13 +125,22 @@ class _MapScreenState extends State<MapScreen> {
           ],
         ),
         actions: [
-          // Map / List toggle (spec 4.10).
-          Obx(() => IconButton(
-                icon: Icon(directory.mapAsList.value
-                    ? Icons.map_outlined
-                    : Icons.list),
+          // Map / List toggle (spec 4.10) — labelled so users know they
+          // can switch between the list and the map view.
+          Obx(() => TextButton.icon(
+                icon: Icon(
+                    directory.mapAsList.value
+                        ? Icons.map_outlined
+                        : Icons.view_list_outlined,
+                    size: 18,
+                    color: c.primaryText),
+                label: Text(
+                    directory.mapAsList.value ? 'map'.tr : 'list_view'.tr,
+                    style: AppTextStyles.bodySm
+                        .copyWith(color: c.primaryText)),
                 onPressed: directory.toggleMapAsList,
               )),
+          const SizedBox(width: AppDimens.space2),
         ],
       ),
       body: Obx(() {

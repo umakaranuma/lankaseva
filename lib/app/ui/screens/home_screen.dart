@@ -122,27 +122,31 @@ class HomeScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppDimens.radiusMd),
                     // One-tap call with confirm dialog (controller handles it).
                     onTap: () => app.callNumber(e.number),
+                    // Minimal bordered tile — single emergency accent, no
+                    // multi-colour fills.
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: AppDimens.space3),
                       decoration: BoxDecoration(
-                        color: e.color,
+                        color: c.bgCard,
                         borderRadius:
                             BorderRadius.circular(AppDimens.radiusMd),
+                        border: Border.all(
+                            color: c.emergency.withValues(alpha: 0.35)),
                       ),
                       child: Row(children: [
-                        Icon(e.icon, color: Colors.white, size: 20),
+                        Icon(e.icon, color: c.emergency, size: 20),
                         const SizedBox(width: AppDimens.space2),
                         Expanded(
                           child: Text(e.nameKey.tr,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: AppTextStyles.bodySm
-                                  .copyWith(color: Colors.white)),
+                                  .copyWith(color: c.textSecondary)),
                         ),
                         Text(e.number,
                             style: AppTextStyles.heading2
-                                .copyWith(color: Colors.white)),
+                                .copyWith(color: c.emergency)),
                       ]),
                     ),
                   ),
@@ -150,19 +154,19 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppDimens.space5),
 
-            // ---- Category grid (4 columns, 8 + More) ----
+            // ---- Category grid (4 columns) — compact, minimal palette ----
             SectionLabel('browse_by_category'.tr),
             GridView.count(
               crossAxisCount: 4,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: AppDimens.space3,
-              childAspectRatio: 0.82,
+              mainAxisSpacing: AppDimens.space1,
+              crossAxisSpacing: AppDimens.space1,
+              childAspectRatio: 0.85,
               children: [
                 for (final meta in kCategories)
                   _CategoryTile(
                     icon: meta.icon,
-                    color: meta.color,
                     label: meta.name(lang),
                     onTap: () {
                       directory.openCategory(meta.id);
@@ -171,7 +175,7 @@ class HomeScreen extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: AppDimens.space5),
+            const SizedBox(height: AppDimens.space4),
 
             // ---- Near you list, with a single ad strip inserted ----
             SectionLabel('${'near_you'.tr} — ${app.district.value}'),
@@ -181,7 +185,12 @@ class HomeScreen extends StatelessWidget {
             ],
             Center(
               child: TextButton(
-                onPressed: () => app.changeTab(2), // Map/list shows all
+                // Open the Map tab in LIST view first; the user can switch
+                // to the map with the toggle when they want.
+                onPressed: () {
+                  directory.mapAsList.value = true;
+                  app.changeTab(2);
+                },
                 child: Text('see_all'.tr),
               ),
             ),
@@ -227,17 +236,14 @@ class _LanguagePills extends StatelessWidget {
   }
 }
 
-/// One coloured icon circle + label tile in the category grid.
+/// One minimal category tile: a bordered icon circle (single primary
+/// accent, no per-category colours) above a compact label.
 class _CategoryTile extends StatelessWidget {
   final IconData icon;
-  final Color color;
   final String label;
   final VoidCallback onTap;
   const _CategoryTile(
-      {required this.icon,
-      required this.color,
-      required this.label,
-      required this.onTap});
+      {required this.icon, required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -246,13 +252,17 @@ class _CategoryTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppDimens.radiusMd),
       onTap: onTap,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 52,
-            height: 52,
+            width: 60,
+            height: 60,
             decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12), shape: BoxShape.circle),
-            child: Icon(icon, color: color, size: 24),
+              color: c.bgCard,
+              shape: BoxShape.circle,
+              border: Border.all(color: c.borderMedium),
+            ),
+            child: Icon(icon, color: c.primary, size: 28),
           ),
           const SizedBox(height: AppDimens.space1),
           Text(label,

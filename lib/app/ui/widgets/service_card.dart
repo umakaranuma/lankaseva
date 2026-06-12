@@ -52,15 +52,16 @@ class ServiceCard extends StatelessWidget {
             padding: const EdgeInsets.all(AppDimens.space3),
             child: Row(
               children: [
-                // Category icon circle, tinted with the category colour.
+                // Category icon in a bordered circle (minimal palette —
+                // single primary accent, colour lives on the border).
                 Container(
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: meta.color.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
+                    border: Border.all(color: c.borderMedium),
                   ),
-                  child: Icon(meta.icon, color: meta.color, size: 22),
+                  child: Icon(meta.icon, color: c.primary, size: 22),
                 ),
                 const SizedBox(width: AppDimens.space3),
                 // Name, rating and status column.
@@ -84,13 +85,14 @@ class ServiceCard extends StatelessWidget {
                                     .copyWith(color: c.textSecondary)),
                             const SizedBox(width: AppDimens.space2),
                           ],
-                          // Live open/closed badge (spec 5.3).
+                          // Live open/closed badge — bordered, not filled
+                          // (spec 5.3).
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 1),
                             decoration: BoxDecoration(
-                              color:
-                                  isOpen ? c.successLight : c.emergencyLight,
+                              border: Border.all(
+                                  color: isOpen ? c.success : c.emergency),
                               borderRadius:
                                   BorderRadius.circular(AppDimens.radiusSm),
                             ),
@@ -118,9 +120,15 @@ class ServiceCard extends StatelessWidget {
                       color: saved ? c.emergency : c.textTertiary),
                   onPressed: () => app.toggleSaved(service.id),
                 ),
-                // One-tap call button (confirm dialog handled in controller).
+                // One-tap call button — bordered (minimal, no fill).
                 IconButton(
-                  style: IconButton.styleFrom(backgroundColor: c.primaryLight),
+                  style: IconButton.styleFrom(
+                    side: BorderSide(color: c.primary),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppDimens.radiusMd),
+                    ),
+                  ),
                   icon: Icon(Icons.phone, size: 20, color: c.primary),
                   onPressed: () =>
                       app.callNumber(service.primaryPhone.number),
