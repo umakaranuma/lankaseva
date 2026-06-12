@@ -283,20 +283,26 @@ class AppToast {
     if (context == null) return;
     final c = AppColors.of(context);
     Get.rawSnackbar(
-      messageText: Text(
-        message,
-        style: AppTextStyles.body.copyWith(color: c.textPrimary),
+      messageText: Row(
+        children: [
+          Container(
+            width: 2,
+            height: 16,
+            decoration: BoxDecoration(
+              color: isError ? c.emergency : c.primary,
+              borderRadius: BorderRadius.circular(1),
+            ),
+          ),
+          const SizedBox(width: AppDimens.space1),
+          Expanded(
+            child: Text(
+              message,
+              style: AppTextStyles.body.copyWith(color: c.textPrimary),
+            ),
+          ),
+        ],
       ),
       backgroundColor: c.bgCard,
-      icon: Container(
-        width: 4,
-        height: 20,
-        margin: const EdgeInsets.only(left: AppDimens.space2),
-        decoration: BoxDecoration(
-          color: isError ? c.emergency : c.primary,
-          borderRadius: BorderRadius.circular(2),
-        ),
-      ),
       borderColor: isError ? c.emergency : c.primary,
       borderWidth: 1.0,
       padding: const EdgeInsets.symmetric(
