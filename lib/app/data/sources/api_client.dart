@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../controllers/auth_controller.dart';
 import '../../core/config/api_config.dart';
 
 /// ---------------------------------------------------------------------------
@@ -65,6 +67,9 @@ class ApiClient {
     // and the next protected action prompts a fresh login.
     if (res.statusCode == 401 && _token != null) {
       setToken(null);
+      try {
+        Get.find<AuthController>().logout();
+      } catch (_) {}
     }
     throw ApiException(res.statusCode, body);
   }
@@ -96,12 +101,17 @@ class ApiClient {
     final items = <Map<String, dynamic>>[];
     String? url = '$baseUrl$path';
     while (url != null) {
-      final res = await http
-          .get(Uri.parse(url), headers: _headers())
-          .timeout(_timeout);
-      final data = _decode(res) as Map<String, dynamic>;
-      items.addAll((data['results'] as List).cast<Map<String, dynamic>>());
-      url = data['next'] as String?;
+      try {
+        final res = await http
+            .get(Uri.parse(url), headers: _headers())
+            .timeout(_timeout);
+        final data = _decode(res) as Map<String, dynamic>;
+        items.addAll((data['results'] as List).cast<Map<String, dynamic>>());
+        url = data['next'] as String?;
+      } on ApiException catch (e) {
+        if (e.statusCode == 401) continue; // Token dropped by _decode, retry!
+        rethrow;
+      }
     }
     return items;
   }
