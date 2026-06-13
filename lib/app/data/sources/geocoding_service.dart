@@ -42,7 +42,7 @@ class GeocodingService {
       final first = results.first as Map<String, dynamic>;
       final lat = double.tryParse(first['lat'] ?? '');
       final lng = double.tryParse(first['lon'] ?? '');
-      if (lat == null || lng == null) return null;
+      if (lat == null || lng == null || !lat.isFinite || !lng.isFinite) return null;
       return (lat, lng);
     } catch (_) {
       return null; // Offline / timeout — seeded coordinate stays in use

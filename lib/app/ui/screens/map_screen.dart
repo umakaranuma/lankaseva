@@ -38,10 +38,32 @@ class _MapScreenState extends State<MapScreen> {
   /// widget state (controllers own data/permissions, not map cameras).
   final MapController _mapController = MapController();
 
+  /// Last camera centre + zoom known to be finite — used to recover if
+  /// flutter_map ever produces a NaN value during a gesture.
+  LatLng _lastGoodCenter = const LatLng(6.9271, 79.8612);
+  double _lastGoodZoom = 12;
+
   /// Centres the camera on the active district's capital.
   LatLng _districtCenter() {
     final d = districtByName(Get.find<AppController>().district.value);
     return LatLng(d?.lat ?? 6.9271, d?.lng ?? 79.8612);
+  }
+
+  /// Backstop: if a gesture drives the camera centre to a non-finite value,
+  /// snap it back to the last good centre on the next frame instead of
+  /// letting flutter_map crash on the bad projection.
+  void _onPositionChanged(MapCamera camera, bool hasGesture) {
+    final ok = camera.center.latitude.isFinite &&
+        camera.center.longitude.isFinite &&
+        camera.zoom.isFinite;
+    if (ok) {
+      _lastGoodCenter = camera.center;
+      _lastGoodZoom = camera.zoom;
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _mapController.move(_lastGoodCenter, _lastGoodZoom);
+      });
+    }
   }
 
   /// "My location" button: runs the permission + GPS flow in
@@ -49,7 +71,7 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _goToMyLocation() async {
     final location = Get.find<LocationController>();
     final fix = await location.getCurrentPosition();
-    if (fix != null) {
+    if (fix != null && fix.latitude.isFinite && fix.longitude.isFinite) {
       _mapController.move(LatLng(fix.latitude, fix.longitude), 14);
     }
   }
@@ -194,6 +216,12 @@ class _MapScreenState extends State<MapScreen> {
                             options: MapOptions(
                               initialCenter: _districtCenter(),
                               initialZoom: 12,
+                              // Bound the zoom: without these, a pinch past
+                              // the projection's valid range produces a NaN
+                              // camera centre and crashes the tile layer.
+                              minZoom: 3,
+                              maxZoom: 18,
+                              onPositionChanged: _onPositionChanged,
                             ),
                             children: [
                               // Free OSM tile layer — no API key required.
@@ -222,7 +250,9 @@ class _MapScreenState extends State<MapScreen> {
                                     ),
                                   ),
                                 // Blue dot for the user's GPS position.
-                                if (fix != null)
+                                if (fix != null &&
+                                    fix.latitude.isFinite &&
+                                    fix.longitude.isFinite)
                                   Marker(
                                     point: LatLng(
                                         fix.latitude, fix.longitude),

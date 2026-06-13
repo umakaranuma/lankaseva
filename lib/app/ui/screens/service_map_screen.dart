@@ -62,10 +62,14 @@ class _ServiceMapScreenState extends State<ServiceMapScreen> {
   /// destination when there is no route.
   void _fitCamera(LocationController location) {
     if (!mounted) return;
-    final points = location.routePoints;
+    // Only fit to FINITE points — a NaN coordinate would crash flutter_map.
+    final points = [
+      for (final p in location.routePoints)
+        if (p.$1.isFinite && p.$2.isFinite) LatLng(p.$1, p.$2)
+    ];
     if (points.length >= 2) {
       _mapController.fitCamera(CameraFit.coordinates(
-        coordinates: [for (final p in points) LatLng(p.$1, p.$2)],
+        coordinates: points,
         padding: const EdgeInsets.all(48),
       ));
     } else {
@@ -105,6 +109,10 @@ class _ServiceMapScreenState extends State<ServiceMapScreen> {
             options: MapOptions(
               initialCenter: LatLng(_target.$1, _target.$2),
               initialZoom: 14,
+              // Bound the zoom to the projection's valid range (prevents a
+              // NaN camera centre crashing the tile layer on pinch-zoom).
+              minZoom: 3,
+              maxZoom: 18,
             ),
             children: [
               TileLayer(
@@ -129,7 +137,9 @@ class _ServiceMapScreenState extends State<ServiceMapScreen> {
                   child: Icon(Icons.location_pin, size: 42, color: meta.color),
                 ),
                 // User position blue dot (when permission was granted).
-                if (fix != null)
+                if (fix != null &&
+                    fix.latitude.isFinite &&
+                    fix.longitude.isFinite)
                   Marker(
                     point: LatLng(fix.latitude, fix.longitude),
                     width: 22,

@@ -47,8 +47,10 @@ class GeocodingController extends GetxController {
       if (parts.length == 2) {
         final lat = double.tryParse(parts[0]);
         final lng = double.tryParse(parts[1]);
-        if (lat != null && lng != null) {
+        if (lat != null && lng != null && lat.isFinite && lng.isFinite) {
           resolved[key.substring(_kCachePrefix.length)] = (lat, lng);
+        } else {
+          _prefs.remove(key);
         }
       }
     }
@@ -58,10 +60,17 @@ class GeocodingController extends GetxController {
   // Public API
   // -------------------------------------------------------------------
 
-  /// The best known position for a service: exact geocoded coordinates
-  /// when available, the seeded district-anchored estimate otherwise.
-  (double, double) positionOf(Service s) =>
-      resolved[s.id] ?? (s.lat, s.lng);
+  /// The best known position for a service: exact geocoded coordinates when
+  /// available, the service's own coordinate next, and finally the district
+  /// capital. Always returns a FINITE pair so map layers can never receive a
+  /// NaN LatLng (which crashes flutter_map on zoom).
+  (double, double) positionOf(Service s) {
+    final r = resolved[s.id];
+    if (r != null && r.$1.isFinite && r.$2.isFinite) return r;
+    if (s.lat.isFinite && s.lng.isFinite) return (s.lat, s.lng);
+    final d = districtByName(s.district);
+    return (d?.lat ?? 6.9271, d?.lng ?? 79.8612); // Colombo as last resort
+  }
 
   /// Ensures every service in [services] is (or will be) geocoded.
   /// Already-resolved ids are skipped; the rest join the throttled queue.
@@ -104,7 +113,9 @@ class GeocodingController extends GetxController {
         '${s.name.en}, ${s.district}, Sri Lanka');
     hit ??= await GeocodingService.lookup(
         '${s.address.en}, ${s.district}, Sri Lanka');
-    if (hit == null) return; // Keep seeded estimate
+    // Reject missing or non-finite results so a bad geocode can never poison
+    // the resolved map with a NaN coordinate.
+    if (hit == null || !hit.$1.isFinite || !hit.$2.isFinite) return;
 
     // District sanity check: the matched point's nearest district capital
     // must be the service's own district, otherwise Nominatim matched a

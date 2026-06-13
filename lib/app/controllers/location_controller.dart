@@ -181,7 +181,10 @@ class LocationController extends GetxController {
   Future<void> buildRouteTo(double toLat, double toLng) async {
     clearRoute();
     final fix = await getCurrentPosition();
-    if (fix == null) return; // No permission/fix → destination-only view
+    // No permission/fix, or a non-finite fix → destination-only view.
+    if (fix == null || !fix.latitude.isFinite || !fix.longitude.isFinite) {
+      return;
+    }
 
     isRouting.value = true;
     try {
@@ -221,7 +224,9 @@ class LocationController extends GetxController {
   /// "Nearest" sorting always have a value.
   double distanceTo(Service s) {
     final fix = position.value;
-    if (fix == null) return s.distanceKm;
+    if (fix == null || !fix.latitude.isFinite || !fix.longitude.isFinite) {
+      return s.distanceKm;
+    }
     final (lat, lng) = Get.find<GeocodingController>().positionOf(s);
     return Geolocator.distanceBetween(fix.latitude, fix.longitude, lat, lng) /
         1000;
