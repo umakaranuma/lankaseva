@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/app_controller.dart';
-import '../../data/sources/emergency_data_source.dart';
+import '../../controllers/emergency_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -17,7 +17,8 @@ class EmergencyScreen extends StatelessWidget {
 
   /// Builds the plain-text hotline list for the share button (spec:
   /// "Share this screen" shares as a text list).
-  String _shareText() => EmergencyDataSource.hotlines
+  String _shareText() => Get.find<EmergencyController>()
+      .hotlines
       .map((e) => '${e.nameKey.tr}: ${e.number}')
       .join('\n');
 
@@ -44,8 +45,8 @@ class EmergencyScreen extends StatelessWidget {
                 style: AppTextStyles.body.copyWith(color: c.textSecondary)),
             const SizedBox(height: AppDimens.space4),
 
-            // Full-width high-contrast hotline tiles (from /api/emergency/).
-            for (final e in EmergencyDataSource.hotlines)
+            // Full-width high-contrast hotline tiles (from the controller).
+            for (final e in Get.find<EmergencyController>().hotlines)
               Padding(
                 padding: const EdgeInsets.only(bottom: AppDimens.space2),
                 child: InkWell(

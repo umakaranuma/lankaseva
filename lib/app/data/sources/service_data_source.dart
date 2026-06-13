@@ -32,6 +32,16 @@ class ServiceDataSource {
     loaded = true;
   }
 
+  /// Fetches one place from `GET /api/services/{id}/` and refreshes the
+  /// cached copy in [services]. Returns the fresh model. Throws on failure.
+  static Future<Service> fetchById(String id) async {
+    final json = await ApiClient.get(ApiConfig.service(id)) as Map<String, dynamic>;
+    final fresh = Service.fromJson(json);
+    final i = services.indexWhere((s) => s.id == fresh.id);
+    if (i != -1) services[i] = fresh;
+    return fresh;
+  }
+
   /// Finds a single service by id (returns null when not found).
   static Service? byId(String id) {
     for (final s in services) {

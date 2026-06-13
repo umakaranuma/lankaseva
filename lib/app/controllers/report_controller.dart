@@ -1,8 +1,7 @@
 import 'package:get/get.dart';
 
-import '../core/config/api_config.dart';
 import '../data/models/service_model.dart';
-import '../data/sources/api_client.dart';
+import '../data/sources/report_data_source.dart';
 
 /// ---------------------------------------------------------------------------
 /// ReportController
@@ -65,11 +64,11 @@ class ReportController extends GetxController {
     final target = reportTarget.value;
     final message = 'Issues: ${infoIssues.join(', ')}'
         '${infoDetail.value.trim().isEmpty ? '' : '\nDetails: ${infoDetail.value.trim()}'}';
-    ApiClient.post(ApiConfig.reports, {
-      if (target != null) 'service': int.tryParse(target.id),
-      'report_type': 'incorrect_info',
-      'message': message,
-    }).catchError((_) => null);
+    ReportDataSource.submit(
+      serviceId: target?.id,
+      reportType: 'incorrect_info',
+      message: message,
+    ).catchError((_) => null);
     return true;
   }
 
@@ -122,10 +121,10 @@ class ReportController extends GetxController {
     final message = 'Category: ${bugCategory.value}'
         '\n${bugDetail.value.trim()}'
         '${contact.isEmpty ? '' : '\nContact: $contact'}';
-    ApiClient.post(ApiConfig.reports, {
-      'report_type': 'bug',
-      'message': message,
-    }).catchError((_) => null);
+    ReportDataSource.submit(
+      reportType: 'bug',
+      message: message,
+    ).catchError((_) => null);
     return true;
   }
 }

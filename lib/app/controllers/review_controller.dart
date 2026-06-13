@@ -1,8 +1,7 @@
 import 'package:get/get.dart';
 
-import '../core/config/api_config.dart';
 import '../data/models/review_model.dart';
-import '../data/sources/api_client.dart';
+import '../data/sources/review_data_source.dart';
 import '../data/sources/service_data_source.dart';
 import 'app_controller.dart';
 import 'auth_controller.dart';
@@ -61,11 +60,10 @@ class ReviewController extends GetxController {
   // Lifecycle
   // -------------------------------------------------------------------
 
-  /// Loads all reviews from `GET /api/reviews/`. Throws on failure so the
+  /// Loads all reviews via the data source. Throws on failure so the
   /// bootstrap can show an error/retry state (no offline seed data).
   Future<void> load() async {
-    final rows = await ApiClient.getAllPages(ApiConfig.reviews);
-    reviews.assignAll(rows.map(Review.fromJson));
+    reviews.assignAll(await ReviewDataSource.fetchAll());
     _sortNewestFirst();
   }
 
@@ -204,22 +202,22 @@ class ReviewController extends GetxController {
       negativeTags: formNegativeTags.toList(),
       createdAt: DateTime.now(),
     );
-    // Optimistic insert so the UI updates instantly, then POST to the
-    // backend and swap in the server's canonical record (real id, timestamp).
+    // Optimistic insert so the UI updates instantly, then persist via the
+    // data source and swap in the server's canonical record (real id/time).
     reviews.add(review);
     _sortNewestFirst();
 
-    if (ApiClient.hasToken) {
-      ApiClient.post(ApiConfig.reviewsCreate, {
-        'service': serviceId,
-        'stars': review.stars,
-        'text': review.text,
-        'positive_tags': review.positiveTags,
-        'negative_tags': review.negativeTags,
-      }).then((res) {
+    if (Get.find<AuthController>().isLoggedIn) {
+      ReviewDataSource.create(
+        serviceId: serviceId,
+        stars: review.stars,
+        text: review.text,
+        positiveTags: review.positiveTags,
+        negativeTags: review.negativeTags,
+      ).then((saved) {
         final idx = reviews.indexWhere((r) => r.id == review.id);
         if (idx != -1) {
-          reviews[idx] = Review.fromJson(res as Map<String, dynamic>);
+          reviews[idx] = saved;
           _sortNewestFirst();
         }
       }).catchError((_) => null);
@@ -230,8 +228,8 @@ class ReviewController extends GetxController {
   /// Deletes one of the user's own reviews (Profile → My Reviews).
   void deleteReview(String reviewId) {
     reviews.removeWhere((r) => r.id == reviewId);
-    if (ApiClient.hasToken) {
-      ApiClient.delete(ApiConfig.review(reviewId)).catchError((_) => null);
+    if (Get.find<AuthController>().isLoggedIn) {
+      ReviewDataSource.delete(reviewId).catchError((_) => null);
     }
   }
 
@@ -243,10 +241,7 @@ class ReviewController extends GetxController {
     }
     review.helpfulCount++;
     reviews.refresh();
-    if (ApiClient.hasToken) {
-      ApiClient.post(ApiConfig.reviewHelpful(review.id))
-          .catchError((_) => null);
-    }
+    ReviewDataSource.markHelpful(review.id).catchError((_) => null);
   }
 
   // -------------------------------------------------------------------

@@ -9,10 +9,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/app_text_styles.dart';
-import '../../core/config/api_config.dart';
 import '../../data/models/service_model.dart';
-import '../../data/sources/api_client.dart';
-import '../../data/sources/service_data_source.dart';
 import '../../routes/app_pages.dart';
 import '../widgets/common_widgets.dart';
 
@@ -32,40 +29,13 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   /// Weekday labels for the opening-hours table.
   static const _days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  /// The service being shown. Seeded from the route argument so the screen
-  /// renders instantly, then refreshed from GET /api/services/{id}/.
-  final Rx<Service> _service = (Get.arguments as Service).obs;
-
-  /// True while the single-record fetch is in flight (drives the top bar).
-  final RxBool _refreshing = false.obs;
-
   @override
   void initState() {
     super.initState();
     // Restart review pagination so every detail visit shows page one.
     Get.find<ReviewController>().resetDetailReviews();
-    // Always pull the authoritative single record from the endpoint.
-    _loadFromApi();
-  }
-
-  /// Fetches the latest details for this service from its own endpoint and
-  /// updates both this screen and the shared directory cache. Keeps the
-  /// passed-in copy when the server is unreachable.
-  Future<void> _loadFromApi() async {
-    _refreshing.value = true;
-    try {
-      final json = await ApiClient.get(ApiConfig.service(_service.value.id))
-          as Map<String, dynamic>;
-      final fresh = Service.fromJson(json);
-      _service.value = fresh;
-      // Keep the in-memory directory consistent with the single view.
-      final i = ServiceDataSource.services.indexWhere((s) => s.id == fresh.id);
-      if (i != -1) ServiceDataSource.services[i] = fresh;
-    } catch (_) {
-      // Offline / server down — keep the copy passed via navigation.
-    } finally {
-      _refreshing.value = false;
-    }
+    // Controller owns the fetch + state; the screen just kicks it off.
+    Get.find<DirectoryController>().openDetail(Get.arguments as Service);
   }
 
   /// Routes to Write Review, detouring through Login when signed out
@@ -91,8 +61,8 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
 
     return Scaffold(
       body: Obx(() {
-        // Reactive: rebuilds when the API refresh lands.
-        final service = _service.value;
+        // Reactive: rebuilds when the controller's API refresh lands.
+        final service = directory.detailService.value ?? (Get.arguments as Service);
         final meta = categoryMeta(service.category);
         final lang = app.language.value;
         final avg = reviewsCtrl.averageFor(service.id);
@@ -124,7 +94,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
               ),
             ],
             // Thin progress bar while GET /api/services/{id}/ is in flight.
-            bottom: _refreshing.value
+            bottom: directory.detailRefreshing.value
                 ? const PreferredSize(
                     preferredSize: Size.fromHeight(3),
                     child: LinearProgressIndicator(minHeight: 3),

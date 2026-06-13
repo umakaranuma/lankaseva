@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../controllers/directory_controller.dart';
 import '../../controllers/notification_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../data/models/notification_model.dart';
-import '../../data/sources/service_data_source.dart';
 import '../../routes/app_pages.dart';
 import '../widgets/common_widgets.dart';
 
@@ -31,7 +31,7 @@ class NotificationsScreen extends StatelessWidget {
   void _onTap(NotificationController ctrl, AppNotification n) {
     ctrl.markRead(n);
     if (n.serviceId != null) {
-      final service = ServiceDataSource.byId(n.serviceId!);
+      final service = Get.find<DirectoryController>().serviceById(n.serviceId!);
       if (service != null) {
         Get.toNamed(Routes.serviceDetail, arguments: service);
       }

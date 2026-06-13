@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/app_controller.dart';
+import '../../controllers/directory_controller.dart';
+import '../../controllers/emergency_controller.dart';
 import '../../controllers/review_controller.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/app_text_styles.dart';
-import '../../data/sources/emergency_data_source.dart';
-import '../../data/sources/service_data_source.dart';
 
 /// ---------------------------------------------------------------------------
 /// SplashScreen — brand moment on cold launch (spec 4.1).
@@ -77,8 +77,8 @@ class _SplashScreenState extends State<SplashScreen>
       // Run the fetches together with a minimum brand pause so the splash
       // never flickers past too quickly on a fast network.
       await Future.wait([
-        ServiceDataSource.load(),
-        EmergencyDataSource.load(),
+        Get.find<DirectoryController>().loadDirectory(),
+        Get.find<EmergencyController>().load(),
         Get.find<ReviewController>().load(),
         Future<void>.delayed(const Duration(milliseconds: 1200)),
       ]);

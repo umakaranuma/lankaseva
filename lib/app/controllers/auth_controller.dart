@@ -7,9 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../core/config/api_config.dart';
 import '../data/models/user_model.dart';
-import '../data/sources/api_client.dart';
+import '../data/sources/auth_data_source.dart';
 import '../ui/widgets/common_widgets.dart';
 
 /// ---------------------------------------------------------------------------
@@ -83,7 +82,7 @@ class AuthController extends GetxController {
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
-    await ApiClient.init(); // Restore the persisted API token
+    await AuthDataSource.init(); // Restore the persisted API token
     final map = <String, String>{};
     for (final field in _userFields) {
       final v = _prefs.getString('$_kUserPrefix$field');
@@ -92,14 +91,14 @@ class AuthController extends GetxController {
     user.value = AppUser.fromMap(map);
     // Re-sync the profile (name etc.) from the database so the app always
     // shows what's stored server-side, not a stale local copy.
-    if (user.value != null && ApiClient.hasToken) refreshProfile();
+    if (user.value != null && AuthDataSource.hasToken) refreshProfile();
   }
 
   /// Pulls the current profile from GET /api/auth/profile/ and updates the
   /// in-memory session. The database is the source of truth.
   Future<void> refreshProfile() async {
     try {
-      final res = await ApiClient.get(ApiConfig.profile) as Map<String, dynamic>;
+      final res = await AuthDataSource.getProfile();
       final u = user.value;
       if (u == null) return;
       u.displayName = (res['display_name'] ?? u.displayName) as String;
@@ -137,8 +136,7 @@ class AuthController extends GetxController {
     otpInput.value = '';
     error.value = '';
     try {
-      final res = await ApiClient.post(
-          ApiConfig.otpSend, {'phone': '+94${phone.value}'});
+      final res = await AuthDataSource.sendOtp('+94${phone.value}');
       _apiMode = true;
       // Development servers return the code (no SMS gateway yet).
       final debugOtp = (res as Map?)?['debug_otp'];
@@ -196,9 +194,9 @@ class AuthController extends GetxController {
     try {
       if (_apiMode) {
         try {
-          final res = await ApiClient.post(ApiConfig.otpVerify,
-              {'phone': '+94${phone.value}', 'otp': otpInput.value});
-          await ApiClient.setToken(res['token']);
+          final res = await AuthDataSource.verifyOtp(
+              '+94${phone.value}', otpInput.value);
+          await AuthDataSource.setToken(res['token']);
           final userJson = res['user'] as Map<String, dynamic>;
           final serverUser = AppUser(
             // App user id == backend integer PK (matches reviews.user_id).
@@ -215,9 +213,9 @@ class AuthController extends GetxController {
           } else {
             _createSessionFromUser(serverUser);
           }
-        } on ApiException {
-          if (step.value == 1) error.value = 'invalid_otp'.tr;
         } catch (_) {
+          // Wrong/expired code or network issue — keep the user on the OTP
+          // step with a clear message.
           if (step.value == 1) error.value = 'invalid_otp'.tr;
         }
         return;
@@ -263,7 +261,7 @@ class AuthController extends GetxController {
     final pending = _pendingApiUser;
     if (_apiMode && pending != null) {
       try {
-        await ApiClient.put(ApiConfig.profile, {'display_name': trimmed});
+        await AuthDataSource.updateProfile(trimmed);
       } catch (_) {} // Saved locally regardless; server retries on next edit
       pending.displayName = trimmed;
       _prefs.setString('name_for_${pending.phoneHash}', trimmed);
@@ -316,10 +314,9 @@ class AuthController extends GetxController {
     final u = user.value;
     final trimmed = name.trim();
     if (u == null || trimmed.length < 2) return false;
-    if (!ApiClient.hasToken) return false; // Must be signed in on the server
+    if (!AuthDataSource.hasToken) return false; // Must be signed in on server
     try {
-      final res = await ApiClient.put(
-          ApiConfig.profile, {'display_name': trimmed});
+      final res = await AuthDataSource.updateProfile(trimmed);
       // Reflect the saved value from the server (authoritative).
       u.displayName = (res['display_name'] ?? trimmed) as String;
       user.refresh();
@@ -375,10 +372,10 @@ class AuthController extends GetxController {
   /// they are device-level, not account-level; the photo stays keyed to
   /// the phone number so it returns on next login).
   void logout() {
-    if (ApiClient.hasToken) {
+    if (AuthDataSource.hasToken) {
       // Revoke the server-side token (best effort).
-      ApiClient.post(ApiConfig.logout).catchError((_) => null);
-      ApiClient.setToken(null);
+      AuthDataSource.logout().catchError((_) => null);
+      AuthDataSource.setToken(null);
     }
     user.value = null;
     for (final field in _userFields) {
@@ -395,10 +392,10 @@ class AuthController extends GetxController {
       _prefs.remove('name_for_${u.phoneHash}');
       removeAvatar();
     }
-    if (ApiClient.hasToken) {
+    if (AuthDataSource.hasToken) {
       // Delete the server account (cascades the user's reviews/tokens).
-      ApiClient.delete(ApiConfig.account).catchError((_) => null);
-      ApiClient.setToken(null);
+      AuthDataSource.deleteAccount().catchError((_) => null);
+      AuthDataSource.setToken(null);
     }
     logout();
   }

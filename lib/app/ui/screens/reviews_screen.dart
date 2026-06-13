@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/app_controller.dart';
+import '../../controllers/directory_controller.dart';
 import '../../controllers/review_controller.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/app_text_styles.dart';
-import '../../data/sources/service_data_source.dart';
 import '../../routes/app_pages.dart';
 import '../widgets/common_widgets.dart';
 
@@ -89,7 +89,8 @@ class ReviewsScreen extends StatelessWidget {
                           );
                         }
                         final r = feed[i];
-                        final service = ServiceDataSource.byId(r.serviceId);
+                        final service = Get.find<DirectoryController>()
+                            .serviceById(r.serviceId);
                         if (service == null) return const SizedBox.shrink();
                         final meta = categoryMeta(service.category);
                         return Container(

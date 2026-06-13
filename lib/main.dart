@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'app/controllers/app_controller.dart';
 import 'app/controllers/auth_controller.dart';
 import 'app/controllers/directory_controller.dart';
+import 'app/controllers/emergency_controller.dart';
 import 'app/controllers/geocoding_controller.dart';
 import 'app/controllers/location_controller.dart';
 import 'app/controllers/notification_controller.dart';
@@ -32,6 +33,7 @@ Future<void> main() async {
   Get.put(LocationController(), permanent: true);
   final geocoder = Get.put(GeocodingController(), permanent: true);
   Get.put(DirectoryController(), permanent: true);
+  Get.put(EmergencyController(), permanent: true);
   final search = Get.put(ServiceSearchController(), permanent: true);
   final notifications = Get.put(NotificationController(), permanent: true);
   Get.put(ReportController(), permanent: true);

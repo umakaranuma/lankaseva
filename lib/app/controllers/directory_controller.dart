@@ -35,6 +35,39 @@ class DirectoryController extends GetxController {
   /// Map screen presentation toggle: false = map, true = list (spec 4.10).
   final RxBool mapAsList = false.obs;
 
+  // -------------------------------------------------------------------
+  // Service detail (single view)
+  // -------------------------------------------------------------------
+
+  /// The service shown on the detail screen. Seeded from the tapped item,
+  /// then replaced with the authoritative record from the endpoint.
+  final Rxn<Service> detailService = Rxn<Service>();
+
+  /// True while the single-record fetch is in flight (drives the top bar).
+  final RxBool detailRefreshing = false.obs;
+
+  /// Looks up a cached service by id (Reviews / Notifications screens).
+  Service? serviceById(String id) => ServiceDataSource.byId(id);
+
+  /// Loads the whole government-places directory (called by the splash
+  /// bootstrap). The data source owns the `GET /api/services/` call.
+  Future<void> loadDirectory() => ServiceDataSource.load();
+
+  /// Opens a service's detail: shows the passed copy instantly, then pulls
+  /// the latest record from `GET /api/services/{id}/`. The screen only reads
+  /// [detailService] / [detailRefreshing] — no data logic lives in the UI.
+  Future<void> openDetail(Service initial) async {
+    detailService.value = initial;
+    detailRefreshing.value = true;
+    try {
+      detailService.value = await ServiceDataSource.fetchById(initial.id);
+    } catch (_) {
+      // Offline / server down — keep the copy passed via navigation.
+    } finally {
+      detailRefreshing.value = false;
+    }
+  }
+
   AppController get _app => Get.find<AppController>();
   ReviewController get _reviews => Get.find<ReviewController>();
   LocationController get _location => Get.find<LocationController>();
