@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/app_controller.dart';
+import '../../controllers/review_controller.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../data/sources/emergency_data_source.dart';
+import '../../data/sources/service_data_source.dart';
 
 /// ---------------------------------------------------------------------------
 /// SplashScreen — brand moment on cold launch (spec 4.1).
@@ -33,6 +36,12 @@ class _SplashScreenState extends State<SplashScreen>
   late final Animation<double> _textFade;
   late final Animation<Offset> _textSlide;
 
+  /// True while the backend bootstrap is in flight.
+  bool _loading = true;
+
+  /// Set when the bootstrap fails so the retry UI is shown.
+  bool _error = false;
+
   @override
   void initState() {
     super.initState();
@@ -53,11 +62,35 @@ class _SplashScreenState extends State<SplashScreen>
             parent: _entrance,
             curve: const Interval(0.35, 0.85, curve: Curves.easeOutCubic)));
     _entrance.forward();
+    _bootstrap();
+  }
 
-    // Brand pause, then route: onboarding (first run) or main shell.
-    Future.delayed(const Duration(milliseconds: 2200), () {
-      if (mounted) Get.offAllNamed(Get.find<AppController>().startRoute);
+  /// Loads ALL content from the backend (services, hotlines, reviews) before
+  /// entering the app. Nothing is bundled, so this gate is what populates the
+  /// home, map, single-view and emergency screens. Shows a retry on failure.
+  Future<void> _bootstrap() async {
+    setState(() {
+      _loading = true;
+      _error = false;
     });
+    try {
+      // Run the fetches together with a minimum brand pause so the splash
+      // never flickers past too quickly on a fast network.
+      await Future.wait([
+        ServiceDataSource.load(),
+        EmergencyDataSource.load(),
+        Get.find<ReviewController>().load(),
+        Future<void>.delayed(const Duration(milliseconds: 1200)),
+      ]);
+      if (!mounted) return;
+      Get.offAllNamed(Get.find<AppController>().startRoute);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = true;
+      });
+    }
   }
 
   @override
@@ -151,20 +184,41 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
               ),
-              // ---- Pinned footer: progress + version ----
+              // ---- Pinned footer: progress / retry + version ----
               FadeTransition(
                 opacity: _textFade,
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: AppDimens.space6),
                   child: Column(
                     children: [
-                      SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white.withValues(alpha: 0.6)),
-                      ),
+                      if (_error) ...[
+                        // Backend unreachable — the app has no offline data,
+                        // so offer a retry rather than an empty home screen.
+                        Icon(Icons.cloud_off_outlined,
+                            color: Colors.white.withValues(alpha: 0.85),
+                            size: 28),
+                        const SizedBox(height: AppDimens.space2),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: AppDimens.space6),
+                          child: Text('connection_error'.tr,
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.body.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.9))),
+                        ),
+                        const SizedBox(height: AppDimens.space3),
+                        FilledButton.tonal(
+                          onPressed: _loading ? null : _bootstrap,
+                          child: Text('retry'.tr),
+                        ),
+                      ] else
+                        SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white.withValues(alpha: 0.6)),
+                        ),
                       const SizedBox(height: AppDimens.space3),
                       Text('v${AppInfo.version}',
                           style: AppTextStyles.caption.copyWith(

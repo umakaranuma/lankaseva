@@ -10,7 +10,14 @@
     <application
         android:label="lankaseva"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/launcher_icon"
+        android:usesCleartextTraffic="true">
+        <!-- usesCleartextTraffic: Android 9+ blocks plain http:// by default,
+             which silently breaks the dev API at http://10.0.2.2:8000 (or a
+             LAN IP). Enabled so the app can reach the backend over HTTP in
+             development. For production use https:// and remove this flag
+             (or scope it with a network-security-config). -->
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

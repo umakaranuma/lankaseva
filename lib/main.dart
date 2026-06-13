@@ -28,7 +28,7 @@ Future<void> main() async {
   // ---- Controller registration (single source of truth for all state) ----
   final app = Get.put(AppController(), permanent: true);
   final auth = Get.put(AuthController(), permanent: true);
-  final reviews = Get.put(ReviewController(), permanent: true);
+  Get.put(ReviewController(), permanent: true);
   Get.put(LocationController(), permanent: true);
   final geocoder = Get.put(GeocodingController(), permanent: true);
   Get.put(DirectoryController(), permanent: true);
@@ -36,11 +36,15 @@ Future<void> main() async {
   final notifications = Get.put(NotificationController(), permanent: true);
   Get.put(ReportController(), permanent: true);
 
-  // Load persisted state before the first frame (no flash of defaults).
+  // Load only LOCAL persisted state before the first frame (preferences,
+  // session token, search history, etc.). The actual content — services,
+  // hotlines and reviews — is fetched from the backend by the SplashScreen
+  // bootstrap, which shows a loading/error state. There is no bundled data.
+  // ApiClient token is restored inside auth.init() so it is ready before the
+  // splash's remote loads run.
   await Future.wait([
     app.init(),
     auth.init(),
-    reviews.init(),
     search.init(),
     geocoder.init(),
     notifications.init(),

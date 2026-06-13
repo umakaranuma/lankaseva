@@ -7,7 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/config/api_config.dart';
 import '../data/models/user_model.dart';
+import '../data/sources/api_client.dart';
 import '../ui/widgets/common_widgets.dart';
 
 /// ---------------------------------------------------------------------------
@@ -19,10 +21,9 @@ import '../ui/widgets/common_widgets.dart';
 ///   2. OTP entry    → verifyOtp() (60 s resend countdown)
 ///   3. display name → completeProfile() (first login only)
 ///
-/// NOTE: This build has no backend, so the OTP is generated locally and
-/// surfaced in a snackbar to simulate the SMS. Swapping in the real
-/// `/auth/otp/send` + `/auth/otp/verify` endpoints only touches this file —
-/// no UI changes needed (that is the point of the controller layer).
+/// Talks to the backend's `/api/auth/otp/send/` + `/api/auth/otp/verify/`
+/// endpoints. When the backend is unreachable the flow falls back to the
+/// original local demo OTP so the app keeps working offline.
 /// ---------------------------------------------------------------------------
 class AuthController extends GetxController {
   static const _kUserPrefix = 'auth_user_';
@@ -53,6 +54,14 @@ class AuthController extends GetxController {
   String _expectedOtp = '';
   Timer? _resendTimer;
 
+  /// True while the current wizard run is backed by the live API (false =
+  /// offline demo fallback).
+  bool _apiMode = false;
+
+  /// Set after API verification for a brand-new user: the session exists on
+  /// the server but we still ask for a display name (wizard step 3).
+  AppUser? _pendingApiUser;
+
   /// True when a verified user session exists.
   bool get isLoggedIn => user.value != null;
 
@@ -72,6 +81,7 @@ class AuthController extends GetxController {
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
+    await ApiClient.init(); // Restore the persisted API token
     final map = <String, String>{};
     for (final field in _userFields) {
       final v = _prefs.getString('$_kUserPrefix$field');
@@ -96,20 +106,33 @@ class AuthController extends GetxController {
     error.value = '';
   }
 
-  /// Validates the number and "sends" the OTP (locally generated here);
-  /// moves the wizard to the OTP step and starts the resend countdown.
-  void sendOtp() {
+  /// Validates the number and requests an OTP from the backend; moves the
+  /// wizard to the OTP step and starts the resend countdown. Falls back to
+  /// a locally generated demo code when the backend is unreachable.
+  Future<void> sendOtp() async {
     if (!RegExp(r'^7\d{8}$').hasMatch(phone.value)) {
       error.value = 'invalid_phone'.tr;
       return;
     }
-    _expectedOtp =
-        List.generate(6, (_) => Random().nextInt(10)).join(); // Demo OTP
     otpInput.value = '';
     error.value = '';
+    try {
+      final res = await ApiClient.post(
+          ApiConfig.otpSend, {'phone': '+94${phone.value}'});
+      _apiMode = true;
+      // Development servers return the code (no SMS gateway yet).
+      final debugOtp = (res as Map?)?['debug_otp'];
+      if (debugOtp != null) {
+        AppToast.show('SMS (dev): Your LankaSeva code is $debugOtp');
+      }
+    } catch (_) {
+      // Offline fallback: local demo OTP, same as the original build.
+      _apiMode = false;
+      _expectedOtp = List.generate(6, (_) => Random().nextInt(10)).join();
+      AppToast.show('SMS (demo): Your LankaSeva code is $_expectedOtp');
+    }
     step.value = 1;
     _startResendCountdown();
-    AppToast.show('SMS (demo): Your LankaSeva code is $_expectedOtp');
   }
 
   /// Re-sends the OTP once the 60-second countdown has elapsed (spec 4.13).
@@ -145,7 +168,36 @@ class AuthController extends GetxController {
 
   /// Checks the entered code. New users continue to the display-name step;
   /// returning users are logged straight in.
-  void verifyOtp() {
+  Future<void> verifyOtp() async {
+    if (_apiMode) {
+      try {
+        final res = await ApiClient.post(ApiConfig.otpVerify,
+            {'phone': '+94${phone.value}', 'otp': otpInput.value});
+        await ApiClient.setToken(res['token']);
+        final userJson = res['user'] as Map<String, dynamic>;
+        final serverUser = AppUser(
+          id: userJson['phone_hash'],
+          phoneHash: userJson['phone_hash'],
+          displayName: userJson['display_name'] ?? 'User',
+          avatarPath: _prefs.getString('avatar_for_${userJson['phone_hash']}'),
+          createdAt:
+              DateTime.tryParse(userJson['created_at'] ?? '') ?? DateTime.now(),
+        );
+        if (res['is_new_user'] == true) {
+          _pendingApiUser = serverUser;
+          step.value = 2; // First time — ask for a display name.
+        } else {
+          _createSessionFromUser(serverUser);
+        }
+      } on ApiException {
+        error.value = 'invalid_otp'.tr;
+      } catch (_) {
+        error.value = 'invalid_otp'.tr;
+      }
+      return;
+    }
+
+    // Offline demo path.
     if (otpInput.value != _expectedOtp) {
       error.value = 'invalid_otp'.tr;
       return;
@@ -165,10 +217,20 @@ class AuthController extends GetxController {
   // -------------------------------------------------------------------
 
   /// Saves the public display name and completes the login.
-  void completeProfile(String name) {
+  Future<void> completeProfile(String name) async {
     final trimmed = name.trim();
     if (trimmed.length < 2) {
       error.value = 'display_name_hint'.tr;
+      return;
+    }
+    final pending = _pendingApiUser;
+    if (_apiMode && pending != null) {
+      try {
+        await ApiClient.put(ApiConfig.profile, {'display_name': trimmed});
+      } catch (_) {} // Saved locally regardless; server retries on next edit
+      pending.displayName = trimmed;
+      _prefs.setString('name_for_${pending.phoneHash}', trimmed);
+      _createSessionFromUser(pending);
       return;
     }
     final hash = _hashPhone('+94${phone.value}');
@@ -179,13 +241,18 @@ class AuthController extends GetxController {
   /// Builds + persists the session, then returns to the pending screen.
   /// A previously saved profile photo for this number is restored.
   void _createSession(String phoneHash, String displayName) {
-    final u = AppUser(
+    _createSessionFromUser(AppUser(
       id: phoneHash,
       phoneHash: phoneHash,
       displayName: displayName,
       avatarPath: _prefs.getString('avatar_for_$phoneHash'),
       createdAt: DateTime.now(),
-    );
+    ));
+  }
+
+  /// Persists an already-built user (local or server-sourced) as the session.
+  void _createSessionFromUser(AppUser u) {
+    _pendingApiUser = null;
     user.value = u;
     u.toMap().forEach((k, v) => _prefs.setString('$_kUserPrefix$k', v));
     _resetWizard();
@@ -207,6 +274,11 @@ class AuthController extends GetxController {
     user.refresh();
     _prefs.setString('${_kUserPrefix}displayName', u.displayName);
     _prefs.setString('name_for_${u.phoneHash}', u.displayName);
+    if (ApiClient.hasToken) {
+      // Best-effort sync; local copy is authoritative until it succeeds.
+      ApiClient.put(ApiConfig.profile, {'display_name': u.displayName})
+          .catchError((_) => null);
+    }
   }
 
   /// Opens the platform photo picker and sets the chosen image as the
@@ -252,6 +324,11 @@ class AuthController extends GetxController {
   /// they are device-level, not account-level; the photo stays keyed to
   /// the phone number so it returns on next login).
   void logout() {
+    if (ApiClient.hasToken) {
+      // Revoke the server-side token (best effort).
+      ApiClient.post(ApiConfig.logout).catchError((_) => null);
+      ApiClient.setToken(null);
+    }
     user.value = null;
     for (final field in _userFields) {
       _prefs.remove('$_kUserPrefix$field');
@@ -266,6 +343,11 @@ class AuthController extends GetxController {
     if (u != null) {
       _prefs.remove('name_for_${u.phoneHash}');
       removeAvatar();
+    }
+    if (ApiClient.hasToken) {
+      // Delete the server account (cascades the user's reviews/tokens).
+      ApiClient.delete(ApiConfig.account).catchError((_) => null);
+      ApiClient.setToken(null);
     }
     logout();
   }

@@ -117,4 +117,52 @@ class Service {
   /// The primary phone number used by the one-tap Call button.
   ServicePhone get primaryPhone =>
       phones.firstWhere((p) => p.isPrimary, orElse: () => phones.first);
+
+  /// Maps the backend's `/api/services/` JSON document onto the domain model.
+  factory Service.fromJson(Map<String, dynamic> json) {
+    final hoursJson = json['hours'] as Map<String, dynamic>?;
+    final byWeekday = <int, (String, String)?>{};
+    if (hoursJson != null) {
+      for (final day in (hoursJson['days'] as List? ?? const [])) {
+        byWeekday[day['weekday'] as int] =
+            (day['open'] as String, day['close'] as String);
+      }
+    }
+    return Service(
+      id: json['id'],
+      name: LocalizedText(
+          en: json['name_en'], si: json['name_si'], ta: json['name_ta']),
+      department: LocalizedText(
+          en: json['department_en'],
+          si: json['department_si'],
+          ta: json['department_ta']),
+      category: ServiceCategory.values.firstWhere(
+          (c) => c.name == json['category'],
+          orElse: () => ServiceCategory.government),
+      district: json['district'],
+      phones: [
+        for (final p in (json['phones'] as List? ?? const []))
+          ServicePhone(
+            label: LocalizedText(
+                en: p['label_en'], si: p['label_si'], ta: p['label_ta']),
+            number: p['number'],
+            isPrimary: p['is_primary'] ?? false,
+          ),
+      ],
+      address: LocalizedText(
+          en: json['address_en'], si: json['address_si'], ta: json['address_ta']),
+      lat: (json['lat'] as num).toDouble(),
+      lng: (json['lng'] as num).toDouble(),
+      hours: hoursJson == null
+          ? OpeningHours.office
+          : OpeningHours(
+              isAlwaysOpen: hoursJson['is_always_open'] ?? false,
+              notes: hoursJson['notes'],
+              byWeekday: byWeekday,
+            ),
+      website: json['website'],
+      whatsapp: json['whatsapp'],
+      isEmergency: json['is_emergency'] ?? false,
+    );
+  }
 }

@@ -1,9 +1,8 @@
-import 'dart:convert';
-
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/config/api_config.dart';
 import '../data/models/review_model.dart';
+import '../data/sources/api_client.dart';
 import '../data/sources/service_data_source.dart';
 import 'app_controller.dart';
 import 'auth_controller.dart';
@@ -20,10 +19,6 @@ import '../ui/widgets/common_widgets.dart';
 ///   • helpful voting and the community feed with filters
 /// ---------------------------------------------------------------------------
 class ReviewController extends GetxController {
-  static const _kUserReviews = 'user_reviews';
-
-  late SharedPreferences _prefs;
-
   /// All reviews in the app, newest first.
   final RxList<Review> reviews = <Review>[].obs;
 
@@ -66,27 +61,11 @@ class ReviewController extends GetxController {
   // Lifecycle
   // -------------------------------------------------------------------
 
-  /// Loads seed reviews plus any locally persisted user reviews.
-  Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
-    reviews.assignAll(ServiceDataSource.seedReviews);
-    final raw = _prefs.getString(_kUserReviews);
-    if (raw != null) {
-      for (final m in (jsonDecode(raw) as List).cast<Map<String, dynamic>>()) {
-        reviews.add(Review(
-          id: m['id'],
-          serviceId: m['serviceId'],
-          userId: m['userId'],
-          displayName: m['displayName'],
-          stars: m['stars'],
-          text: m['text'],
-          positiveTags: (m['positiveTags'] as List).cast<String>(),
-          negativeTags: (m['negativeTags'] as List).cast<String>(),
-          helpfulCount: m['helpfulCount'] ?? 0,
-          createdAt: DateTime.parse(m['createdAt']),
-        ));
-      }
-    }
+  /// Loads all reviews from `GET /api/reviews/`. Throws on failure so the
+  /// bootstrap can show an error/retry state (no offline seed data).
+  Future<void> load() async {
+    final rows = await ApiClient.getAllPages(ApiConfig.reviews);
+    reviews.assignAll(rows.map(Review.fromJson));
     _sortNewestFirst();
   }
 
@@ -214,7 +193,7 @@ class ReviewController extends GetxController {
         .trim()
         .replaceAll(RegExp(r'(\+?\d[\d\s-]{7,}\d)'), '[number removed]');
 
-    reviews.add(Review(
+    final review = Review(
       id: 'r${DateTime.now().millisecondsSinceEpoch}',
       serviceId: serviceId,
       userId: user.id,
@@ -224,16 +203,36 @@ class ReviewController extends GetxController {
       positiveTags: formPositiveTags.toList(),
       negativeTags: formNegativeTags.toList(),
       createdAt: DateTime.now(),
-    ));
+    );
+    // Optimistic insert so the UI updates instantly, then POST to the
+    // backend and swap in the server's canonical record (real id, timestamp).
+    reviews.add(review);
     _sortNewestFirst();
-    _persistUserReviews();
+
+    if (ApiClient.hasToken) {
+      ApiClient.post(ApiConfig.reviewsCreate, {
+        'service': serviceId,
+        'stars': review.stars,
+        'text': review.text,
+        'positive_tags': review.positiveTags,
+        'negative_tags': review.negativeTags,
+      }).then((res) {
+        final idx = reviews.indexWhere((r) => r.id == review.id);
+        if (idx != -1) {
+          reviews[idx] = Review.fromJson(res as Map<String, dynamic>);
+          _sortNewestFirst();
+        }
+      }).catchError((_) => null);
+    }
     return true;
   }
 
   /// Deletes one of the user's own reviews (Profile → My Reviews).
   void deleteReview(String reviewId) {
     reviews.removeWhere((r) => r.id == reviewId);
-    _persistUserReviews();
+    if (ApiClient.hasToken) {
+      ApiClient.delete(ApiConfig.review(reviewId)).catchError((_) => null);
+    }
   }
 
   /// Increments the helpful counter on a review (requires login per spec).
@@ -244,7 +243,10 @@ class ReviewController extends GetxController {
     }
     review.helpfulCount++;
     reviews.refresh();
-    _persistUserReviews();
+    if (ApiClient.hasToken) {
+      ApiClient.post(ApiConfig.reviewHelpful(review.id))
+          .catchError((_) => null);
+    }
   }
 
   // -------------------------------------------------------------------
@@ -254,25 +256,4 @@ class ReviewController extends GetxController {
   /// Keeps the master list ordered newest-first for every consumer.
   void _sortNewestFirst() =>
       reviews.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-  /// Persists only user-generated reviews (seed data is rebuilt each run).
-  void _persistUserReviews() {
-    final userOnes = reviews.where((r) => !r.userId.startsWith('seed_'));
-    _prefs.setString(
-        _kUserReviews,
-        jsonEncode(userOnes
-            .map((r) => {
-                  'id': r.id,
-                  'serviceId': r.serviceId,
-                  'userId': r.userId,
-                  'displayName': r.displayName,
-                  'stars': r.stars,
-                  'text': r.text,
-                  'positiveTags': r.positiveTags,
-                  'negativeTags': r.negativeTags,
-                  'helpfulCount': r.helpfulCount,
-                  'createdAt': r.createdAt.toIso8601String(),
-                })
-            .toList()));
-  }
 }

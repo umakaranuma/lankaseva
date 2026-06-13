@@ -28,6 +28,32 @@ class Review {
     this.editedAt,
   });
 
+  /// Maps the backend's `/api/reviews/` JSON onto the domain model.
+  factory Review.fromJson(Map<String, dynamic> json) {
+    final tags = (json['tags'] as List? ?? const []).cast<Map<String, dynamic>>();
+    return Review(
+      id: json['id'],
+      serviceId: json['service'],
+      userId: json['user_id'],
+      displayName: json['display_name'] ?? 'User',
+      stars: json['stars'],
+      text: json['text'],
+      positiveTags: [
+        for (final t in tags)
+          if (t['is_positive'] == true) t['tag_key'] as String
+      ],
+      negativeTags: [
+        for (final t in tags)
+          if (t['is_positive'] != true) t['tag_key'] as String
+      ],
+      helpfulCount: json['helpful_count'] ?? 0,
+      createdAt: DateTime.parse(json['created_at']).toLocal(),
+      editedAt: json['edited_at'] != null
+          ? DateTime.parse(json['edited_at']).toLocal()
+          : null,
+    );
+  }
+
   /// Initials shown inside the avatar circle (e.g. "Nimal P." → "NP").
   String get initials {
     final parts = displayName.trim().split(RegExp(r'\s+'));

@@ -180,84 +180,9 @@ class EmergencyContact {
   });
 }
 
-/// The ten national hotlines, stored locally so the Emergency screen works
-/// fully offline (spec 5.2).
-const List<EmergencyContact> kEmergencyContacts = [
-  EmergencyContact(
-      nameKey: 'em_police',
-      number: '119',
-      icon: Icons.shield_outlined,
-      color: Color(0xFFA32D2D)),
-  EmergencyContact(
-      nameKey: 'em_ambulance',
-      number: '1990',
-      icon: Icons.medical_services_outlined,
-      color: Color(0xFF185FA5)),
-  EmergencyContact(
-      nameKey: 'em_fire',
-      number: '111',
-      icon: Icons.local_fire_department_outlined,
-      color: Color(0xFF854F0B)),
-  EmergencyContact(
-      nameKey: 'em_disaster',
-      number: '117',
-      icon: Icons.warning_amber_outlined,
-      color: Color(0xFF3B6D11)),
-  EmergencyContact(
-      nameKey: 'em_women_child',
-      number: '1938',
-      icon: Icons.family_restroom_outlined,
-      color: Color(0xFF72243E)),
-  EmergencyContact(
-      nameKey: 'em_mental',
-      number: '1926',
-      icon: Icons.psychology_outlined,
-      color: Color(0xFF534AB7)),
-  EmergencyContact(
-      nameKey: 'em_ceb',
-      number: '1987',
-      icon: Icons.bolt_outlined,
-      color: Color(0xFF0F6E56)),
-  EmergencyContact(
-      nameKey: 'em_water',
-      number: '1954',
-      icon: Icons.water_drop_outlined,
-      color: Color(0xFF185FA5)),
-  EmergencyContact(
-      nameKey: 'em_tourist',
-      number: '1912',
-      icon: Icons.travel_explore_outlined,
-      color: Color(0xFF3C3489)),
-  EmergencyContact(
-      nameKey: 'em_consumer',
-      number: '1977',
-      icon: Icons.gavel_outlined,
-      color: Color(0xFF5F5E5A)),
-];
-
-/// The four home-screen quick-dial tiles (spec 4.5 — Emergency Section).
-const List<EmergencyContact> kQuickDialContacts = [
-  EmergencyContact(
-      nameKey: 'em_police',
-      number: '119',
-      icon: Icons.shield_outlined,
-      color: Color(0xFFA32D2D)),
-  EmergencyContact(
-      nameKey: 'em_ambulance_short',
-      number: '110',
-      icon: Icons.medical_services_outlined,
-      color: Color(0xFF185FA5)),
-  EmergencyContact(
-      nameKey: 'em_fire',
-      number: '111',
-      icon: Icons.local_fire_department_outlined,
-      color: Color(0xFF854F0B)),
-  EmergencyContact(
-      nameKey: 'em_disaster',
-      number: '117',
-      icon: Icons.warning_amber_outlined,
-      color: Color(0xFF3B6D11)),
-];
+// The emergency hotlines (hub list + home quick-dial) are no longer bundled
+// here — they are fetched from GET /api/emergency/ into EmergencyDataSource.
+// The [EmergencyContact] class above is the in-memory model for those rows.
 
 /// App metadata used on Splash / About screens.
 class AppInfo {

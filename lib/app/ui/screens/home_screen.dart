@@ -5,6 +5,7 @@ import '../../controllers/app_controller.dart';
 import '../../controllers/directory_controller.dart';
 import '../../controllers/notification_controller.dart';
 import '../../core/constants/app_constants.dart';
+import '../../data/sources/emergency_data_source.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -117,7 +118,7 @@ class HomeScreen extends StatelessWidget {
               crossAxisSpacing: AppDimens.space2,
               childAspectRatio: 2.6,
               children: [
-                for (final e in kQuickDialContacts)
+                for (final e in EmergencyDataSource.quickDial)
                   InkWell(
                     borderRadius: BorderRadius.circular(AppDimens.radiusMd),
                     // One-tap call with confirm dialog (controller handles it).

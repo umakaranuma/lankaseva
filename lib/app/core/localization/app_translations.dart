@@ -22,6 +22,8 @@ class AppTranslations extends Translations {
     // Generic
     'app_name': 'LankaSeva',
     'app_tagline': 'Every service. One tap away.',
+    'connection_error': 'Could not reach the server. Check your connection and try again.',
+    'retry': 'Retry',
     'continue': 'Continue',
     'skip': 'Skip',
     'next': 'Next',
@@ -234,6 +236,8 @@ class AppTranslations extends Translations {
   static const Map<String, String> _si = {
     'app_name': 'ලංකා සේවා',
     'app_tagline': 'සෑම සේවාවක්ම. එක ක්ලික් එකකින්.',
+    'connection_error': 'සේවාදායකය හා සම්බන්ධ විය නොහැකි විය. ඔබගේ සම්බන්ධතාවය පරීක්ෂා කර නැවත උත්සාහ කරන්න.',
+    'retry': 'නැවත උත්සාහ කරන්න',
     'continue': 'ඉදිරියට',
     'skip': 'මඟ හරින්න',
     'next': 'ඊළඟ',
@@ -427,6 +431,8 @@ class AppTranslations extends Translations {
   static const Map<String, String> _ta = {
     'app_name': 'LankaSeva',
     'app_tagline': 'ஒவ்வொரு சேவையும். ஒரு தட்டில்.',
+    'connection_error': 'சேவையகத்தை அணுக முடியவில்லை. உங்கள் இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.',
+    'retry': 'மீண்டும் முயற்சி',
     'continue': 'தொடரவும்',
     'skip': 'தவிர்',
     'next': 'அடுத்து',
