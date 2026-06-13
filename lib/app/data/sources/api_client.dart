@@ -60,6 +60,12 @@ class ApiClient {
   static dynamic _decode(http.Response res) {
     final body = res.body.isEmpty ? null : jsonDecode(utf8.decode(res.bodyBytes));
     if (res.statusCode >= 200 && res.statusCode < 300) return body;
+    // A 401 means our stored token is no longer valid (expired, revoked, or
+    // the server DB was reset). Drop it so the app falls back to anonymous
+    // and the next protected action prompts a fresh login.
+    if (res.statusCode == 401 && _token != null) {
+      setToken(null);
+    }
     throw ApiException(res.statusCode, body);
   }
 

@@ -58,6 +58,9 @@ class ApiConfig {
   // ---- Emergency hotlines --------------------------------------------
   static const String emergency = '/api/emergency/';
 
+  // ---- Reports --------------------------------------------------------
+  static const String reports = '/api/reports/';
+
   // ---- Reviews --------------------------------------------------------
   static const String reviews = '/api/reviews/?limit=$pageLimit';
   static const String reviewsCreate = '/api/reviews/';

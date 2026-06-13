@@ -167,10 +167,10 @@ class ReviewController extends GetxController {
     if (!set.remove(key)) set.add(key);
   }
 
-  /// Submit is enabled only when a star rating plus the minimum text length
-  /// are present (spec 4.12).
+  /// Submit is enabled once a star rating and some text are present — any
+  /// length is fine (e.g. "good", "nice"); no minimum character rule.
   bool get canSubmit =>
-      formStars.value > 0 && formText.value.trim().length >= 20;
+      formStars.value > 0 && formText.value.trim().isNotEmpty;
 
   /// True when the logged-in user already reviewed this service
   /// (one review per user per service — spec 5.4).

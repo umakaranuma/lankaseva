@@ -91,11 +91,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
                   maxLength: 500,
                   decoration: InputDecoration(
                     hintText: 'describe_experience'.tr,
-                    helperText: reviews.formText.value.trim().length < 20
-                        ? 'review_min_chars'.tr
-                        : null,
-                    counterText:
-                        '${reviews.formText.value.length}/500',
+                    counterText: '${reviews.formText.value.length}/500',
                   ),
                 ),
                 const SizedBox(height: AppDimens.space4),

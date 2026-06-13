@@ -32,9 +32,10 @@ class Review {
   factory Review.fromJson(Map<String, dynamic> json) {
     final tags = (json['tags'] as List? ?? const []).cast<Map<String, dynamic>>();
     return Review(
-      id: json['id'],
-      serviceId: json['service'],
-      userId: json['user_id'],
+      // All ids are integers on the backend; carry them as strings here.
+      id: json['id'].toString(),
+      serviceId: json['service'].toString(),
+      userId: json['user_id'].toString(),
       displayName: json['display_name'] ?? 'User',
       stars: json['stars'],
       text: json['text'],

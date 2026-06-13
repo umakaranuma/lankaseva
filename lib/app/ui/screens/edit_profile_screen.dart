@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/auth_controller.dart';
+import '../../controllers/review_controller.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -56,13 +57,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     ]);
   }
 
-  /// Persists the new display name and returns to Settings.
-  void _save(AuthController auth) {
+  /// Persists the new display name to the database, then returns to Settings.
+  /// Only reports success once the server confirms the update.
+  bool _saving = false;
+
+  Future<void> _save(AuthController auth) async {
     final name = _nameController.text.trim();
-    if (name.length < 2) return; // Button is disabled in this state anyway
-    auth.updateDisplayName(name);
-    Get.back();
-    AppToast.show('profile_saved'.tr);
+    if (name.length < 2 || _saving) return;
+    setState(() => _saving = true);
+    final ok = await auth.updateDisplayName(name);
+    if (!mounted) return;
+    setState(() => _saving = false);
+    if (ok) {
+      // Re-pull reviews so the new name (joined from the user table) shows
+      // immediately wherever this user's reviews appear.
+      Get.find<ReviewController>().load();
+      Get.back();
+      AppToast.show('profile_saved'.tr);
+    } else {
+      AppToast.show('profile_save_failed'.tr);
+    }
   }
 
   @override
@@ -165,10 +179,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
               // ---- Save ----
               ElevatedButton(
-                onPressed: _nameController.text.trim().length >= 2
+                onPressed: (_nameController.text.trim().length >= 2 && !_saving)
                     ? () => _save(auth)
                     : null,
-                child: Text('save'.tr),
+                child: _saving
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2))
+                    : Text('save'.tr),
               ),
             ],
           );

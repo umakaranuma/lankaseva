@@ -90,6 +90,24 @@ class AuthController extends GetxController {
       if (v != null) map[field] = v;
     }
     user.value = AppUser.fromMap(map);
+    // Re-sync the profile (name etc.) from the database so the app always
+    // shows what's stored server-side, not a stale local copy.
+    if (user.value != null && ApiClient.hasToken) refreshProfile();
+  }
+
+  /// Pulls the current profile from GET /api/auth/profile/ and updates the
+  /// in-memory session. The database is the source of truth.
+  Future<void> refreshProfile() async {
+    try {
+      final res = await ApiClient.get(ApiConfig.profile) as Map<String, dynamic>;
+      final u = user.value;
+      if (u == null) return;
+      u.displayName = (res['display_name'] ?? u.displayName) as String;
+      user.refresh();
+      _prefs.setString('${_kUserPrefix}displayName', u.displayName);
+    } catch (_) {
+      // Offline or stale token — keep the restored session as-is.
+    }
   }
 
   @override
@@ -178,7 +196,8 @@ class AuthController extends GetxController {
         await ApiClient.setToken(res['token']);
         final userJson = res['user'] as Map<String, dynamic>;
         final serverUser = AppUser(
-          id: userJson['phone_hash'],
+          // App user id == backend integer PK (matches reviews.user_id).
+          id: userJson['id'].toString(),
           phoneHash: userJson['phone_hash'],
           displayName: userJson['display_name'] ?? 'User',
           avatarPath: _prefs.getString('avatar_for_${userJson['phone_hash']}'),
@@ -280,18 +299,28 @@ class AuthController extends GetxController {
   // Profile management
   // -------------------------------------------------------------------
 
-  /// Renames the public display name shown on reviews (Profile screen).
-  void updateDisplayName(String name) {
+  /// Renames the public display name (shown on every review via the user
+  /// table join). The DATABASE is the source of truth: this PUTs to the
+  /// profile endpoint and only updates the in-memory session from the
+  /// server's response. Returns false when the server rejects/can't be
+  /// reached, so the screen can show an error instead of a false success.
+  Future<bool> updateDisplayName(String name) async {
     final u = user.value;
-    if (u == null || name.trim().length < 2) return;
-    u.displayName = name.trim();
-    user.refresh();
-    _prefs.setString('${_kUserPrefix}displayName', u.displayName);
-    _prefs.setString('name_for_${u.phoneHash}', u.displayName);
-    if (ApiClient.hasToken) {
-      // Best-effort sync; local copy is authoritative until it succeeds.
-      ApiClient.put(ApiConfig.profile, {'display_name': u.displayName})
-          .catchError((_) => null);
+    final trimmed = name.trim();
+    if (u == null || trimmed.length < 2) return false;
+    if (!ApiClient.hasToken) return false; // Must be signed in on the server
+    try {
+      final res = await ApiClient.put(
+          ApiConfig.profile, {'display_name': trimmed});
+      // Reflect the saved value from the server (authoritative).
+      u.displayName = (res['display_name'] ?? trimmed) as String;
+      user.refresh();
+      // Cache only for instant session restore on next launch; the server
+      // remains the source of truth and is re-read on login.
+      _prefs.setString('${_kUserPrefix}displayName', u.displayName);
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 

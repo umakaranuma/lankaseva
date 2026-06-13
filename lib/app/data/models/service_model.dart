@@ -129,7 +129,8 @@ class Service {
       }
     }
     return Service(
-      id: json['id'],
+      // Backend PK is now an integer; keep the app's id as an opaque string.
+      id: json['id'].toString(),
       name: LocalizedText(
           en: json['name_en'], si: json['name_si'], ta: json['name_ta']),
       department: LocalizedText(

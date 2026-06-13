@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 
+import '../core/config/api_config.dart';
 import '../data/models/service_model.dart';
+import '../data/sources/api_client.dart';
 
 /// ---------------------------------------------------------------------------
 /// ReportController
@@ -55,11 +57,19 @@ class ReportController extends GetxController {
   /// Submit is enabled once at least one issue is flagged.
   bool get canSubmitInfo => infoIssues.isNotEmpty;
 
-  /// Submits the incorrect-info report (POST /report/:serviceId in prod).
-  /// Returns true so the screen can pop with a success message.
+  /// Submits the incorrect-info report to POST /api/reports/ and returns true
+  /// so the screen can pop with a success message. The network call is
+  /// best-effort (fire-and-forget) so the UX stays instant.
   bool submitInfoReport() {
     if (!canSubmitInfo) return false;
-    // A real build would send: serviceId, infoIssues, infoDetail.
+    final target = reportTarget.value;
+    final message = 'Issues: ${infoIssues.join(', ')}'
+        '${infoDetail.value.trim().isEmpty ? '' : '\nDetails: ${infoDetail.value.trim()}'}';
+    ApiClient.post(ApiConfig.reports, {
+      if (target != null) 'service': int.tryParse(target.id),
+      'report_type': 'incorrect_info',
+      'message': message,
+    }).catchError((_) => null);
     return true;
   }
 
@@ -104,10 +114,18 @@ class ReportController extends GetxController {
   bool get canSubmitBug =>
       bugCategory.value != null && bugDetail.value.trim().length >= 10;
 
-  /// Submits the bug report (POST /feedback in prod). Returns true on success.
+  /// Submits the bug report to POST /api/reports/ (best-effort) and returns
+  /// true on success so the screen can pop.
   bool submitBug() {
     if (!canSubmitBug) return false;
-    // A real build would send: bugCategory, bugDetail, bugContact, appVersion.
+    final contact = bugContact.value.trim();
+    final message = 'Category: ${bugCategory.value}'
+        '\n${bugDetail.value.trim()}'
+        '${contact.isEmpty ? '' : '\nContact: $contact'}';
+    ApiClient.post(ApiConfig.reports, {
+      'report_type': 'bug',
+      'message': message,
+    }).catchError((_) => null);
     return true;
   }
 }
