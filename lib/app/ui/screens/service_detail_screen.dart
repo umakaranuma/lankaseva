@@ -9,7 +9,10 @@ import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_dimens.dart';
 import '../../core/theme/app_text_styles.dart';
+import '../../core/config/api_config.dart';
 import '../../data/models/service_model.dart';
+import '../../data/sources/api_client.dart';
+import '../../data/sources/service_data_source.dart';
 import '../../routes/app_pages.dart';
 import '../widgets/common_widgets.dart';
 
@@ -29,11 +32,40 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
   /// Weekday labels for the opening-hours table.
   static const _days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+  /// The service being shown. Seeded from the route argument so the screen
+  /// renders instantly, then refreshed from GET /api/services/{id}/.
+  final Rx<Service> _service = (Get.arguments as Service).obs;
+
+  /// True while the single-record fetch is in flight (drives the top bar).
+  final RxBool _refreshing = false.obs;
+
   @override
   void initState() {
     super.initState();
     // Restart review pagination so every detail visit shows page one.
     Get.find<ReviewController>().resetDetailReviews();
+    // Always pull the authoritative single record from the endpoint.
+    _loadFromApi();
+  }
+
+  /// Fetches the latest details for this service from its own endpoint and
+  /// updates both this screen and the shared directory cache. Keeps the
+  /// passed-in copy when the server is unreachable.
+  Future<void> _loadFromApi() async {
+    _refreshing.value = true;
+    try {
+      final json = await ApiClient.get(ApiConfig.service(_service.value.id))
+          as Map<String, dynamic>;
+      final fresh = Service.fromJson(json);
+      _service.value = fresh;
+      // Keep the in-memory directory consistent with the single view.
+      final i = ServiceDataSource.services.indexWhere((s) => s.id == fresh.id);
+      if (i != -1) ServiceDataSource.services[i] = fresh;
+    } catch (_) {
+      // Offline / server down — keep the copy passed via navigation.
+    } finally {
+      _refreshing.value = false;
+    }
   }
 
   /// Routes to Write Review, detouring through Login when signed out
@@ -44,21 +76,24 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
       Get.toNamed(Routes.writeReview, arguments: service);
     } else {
       auth.pendingRedirect = Routes.writeReview;
+      auth.pendingRedirectArgs = service;
       Get.toNamed(Routes.login, arguments: service);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final Service service = Get.arguments as Service;
     final app = Get.find<AppController>();
+    final auth = Get.find<AuthController>();
     final directory = Get.find<DirectoryController>();
     final reviewsCtrl = Get.find<ReviewController>();
     final c = AppColors.of(context);
-    final meta = categoryMeta(service.category);
 
     return Scaffold(
       body: Obx(() {
+        // Reactive: rebuilds when the API refresh lands.
+        final service = _service.value;
+        final meta = categoryMeta(service.category);
         final lang = app.language.value;
         final avg = reviewsCtrl.averageFor(service.id);
         final count = reviewsCtrl.countFor(service.id);
@@ -70,11 +105,15 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
         final moreCount = allReviews.length - reviews.length;
         final isOpen = service.hours.isOpenAt(DateTime.now());
         final saved = app.isSaved(service.id);
+        // One review per user per service: once they've reviewed, the entry
+        // is disabled with a clear label (consistent for every user).
+        final alreadyReviewed =
+            auth.isLoggedIn && reviewsCtrl.hasReviewed(service.id);
 
         return CustomScrollView(slivers: [
-          // ---- Category-coloured header ----
+          // ---- Header (single app theme colour for every service) ----
           SliverAppBar(
-            backgroundColor: meta.color,
+            backgroundColor: c.primary,
             pinned: true,
             expandedHeight: 190,
             actions: [
@@ -84,6 +123,13 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                 onPressed: () => app.toggleSaved(service.id),
               ),
             ],
+            // Thin progress bar while GET /api/services/{id}/ is in flight.
+            bottom: _refreshing.value
+                ? const PreferredSize(
+                    preferredSize: Size.fromHeight(3),
+                    child: LinearProgressIndicator(minHeight: 3),
+                  )
+                : null,
             flexibleSpace: FlexibleSpaceBar(
               background: SafeArea(
                 child: Padding(
@@ -170,7 +216,7 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                     ListTile(
                       dense: true,
                       leading: Icon(Icons.location_on_outlined,
-                          color: c.info, size: 20),
+                          color: c.primary, size: 20),
                       title: Text('address'.tr,
                           style: AppTextStyles.caption
                               .copyWith(color: c.textTertiary)),
@@ -183,13 +229,13 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                       ListTile(
                         dense: true,
                         leading:
-                            Icon(Icons.language, color: c.info, size: 20),
+                            Icon(Icons.language, color: c.primary, size: 20),
                         title: Text('website'.tr,
                             style: AppTextStyles.caption
                                 .copyWith(color: c.textTertiary)),
                         subtitle: Text(service.website!,
                             style: AppTextStyles.bodySm
-                                .copyWith(color: c.info)),
+                                .copyWith(color: c.primary)),
                         onTap: () => app.openUrl(service.website!),
                       ),
                     // WhatsApp contact (gap fix — field existed in the
@@ -198,13 +244,13 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                       ListTile(
                         dense: true,
                         leading: Icon(Icons.chat_outlined,
-                            color: c.success, size: 20),
+                            color: c.primary, size: 20),
                         title: Text('whatsapp'.tr,
                             style: AppTextStyles.caption
                                 .copyWith(color: c.textTertiary)),
                         subtitle: Text(service.whatsapp!,
                             style: AppTextStyles.phoneNumber
-                                .copyWith(color: c.success)),
+                                .copyWith(color: c.primary)),
                         onTap: () => app.openUrl(
                             'https://wa.me/${service.whatsapp!.replaceAll(RegExp(r'\D'), '')}'),
                       ),
@@ -326,10 +372,18 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                     const SizedBox(height: AppDimens.space3),
                   ],
                   // Write-a-review entry (login-gated in _onWriteReview).
+                  // Disabled with a clear label once the user has reviewed.
                   OutlinedButton.icon(
-                    icon: const Icon(Icons.edit_outlined, size: 18),
-                    label: Text('write_review'.tr),
-                    onPressed: () => _onWriteReview(service),
+                    icon: Icon(
+                        alreadyReviewed
+                            ? Icons.check_circle_outline
+                            : Icons.edit_outlined,
+                        size: 18),
+                    label: Text(alreadyReviewed
+                        ? 'already_reviewed'.tr
+                        : 'write_review'.tr),
+                    onPressed:
+                        alreadyReviewed ? null : () => _onWriteReview(service),
                   ),
                   const SizedBox(height: AppDimens.space3),
                   // Recent review cards.

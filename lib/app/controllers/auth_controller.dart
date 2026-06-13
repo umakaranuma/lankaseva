@@ -48,8 +48,10 @@ class AuthController extends GetxController {
   /// Seconds remaining before "Resend OTP" re-enables.
   final RxInt resendCountdown = 0.obs;
 
-  /// Route to return to after a successful login (e.g. Write Review).
+  /// Route to return to after a successful login (e.g. Write Review), with
+  /// the arguments that route needs (e.g. the Service being reviewed).
   String? pendingRedirect;
+  dynamic pendingRedirectArgs;
 
   String _expectedOtp = '';
   Timer? _resendTimer;
@@ -185,7 +187,7 @@ class AuthController extends GetxController {
         );
         if (res['is_new_user'] == true) {
           _pendingApiUser = serverUser;
-          step.value = 2; // First time — ask for a display name.
+          _goToNameStep(); // First time — ask for a display name.
         } else {
           _createSessionFromUser(serverUser);
         }
@@ -208,8 +210,16 @@ class AuthController extends GetxController {
     if (savedName != null) {
       _createSession(hash, savedName);
     } else {
-      step.value = 2; // First time — ask for a display name.
+      _goToNameStep(); // First time — ask for a display name.
     }
+  }
+
+  /// Advances to the display-name step, clearing any OTP error/input so the
+  /// name screen never shows a stale "invalid code" message.
+  void _goToNameStep() {
+    error.value = '';
+    otpInput.value = '';
+    step.value = 2;
   }
 
   // -------------------------------------------------------------------
@@ -257,9 +267,13 @@ class AuthController extends GetxController {
     u.toMap().forEach((k, v) => _prefs.setString('$_kUserPrefix$k', v));
     _resetWizard();
     final redirect = pendingRedirect;
+    final redirectArgs = pendingRedirectArgs;
     pendingRedirect = null;
+    pendingRedirectArgs = null;
     Get.back(); // Close login screen
-    if (redirect != null) Get.toNamed(redirect);
+    // Pass the original arguments through so the target screen (e.g. Write
+    // Review) still receives its Service — otherwise it opens with no data.
+    if (redirect != null) Get.toNamed(redirect, arguments: redirectArgs);
   }
 
   // -------------------------------------------------------------------

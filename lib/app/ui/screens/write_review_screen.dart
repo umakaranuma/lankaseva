@@ -23,11 +23,22 @@ class WriteReviewScreen extends StatefulWidget {
 }
 
 class _WriteReviewScreenState extends State<WriteReviewScreen> {
+  final TextEditingController _textController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     // Reset the form every time the screen opens.
     Get.find<ReviewController>().startReview();
+    _textController.addListener(() {
+      Get.find<ReviewController>().onReviewTextChanged(_textController.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
   }
 
   /// Submits via the controller; on success pops back with the toast.
@@ -75,6 +86,7 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
 
                 // ---- Text area with live character counter ----
                 TextField(
+                  controller: _textController,
                   maxLines: 5,
                   maxLength: 500,
                   decoration: InputDecoration(
@@ -85,7 +97,6 @@ class _WriteReviewScreenState extends State<WriteReviewScreen> {
                     counterText:
                         '${reviews.formText.value.length}/500',
                   ),
-                  onChanged: reviews.onReviewTextChanged,
                 ),
                 const SizedBox(height: AppDimens.space4),
 

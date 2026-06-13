@@ -11,9 +11,27 @@ import '../../core/theme/app_text_styles.dart';
 /// phone → OTP (with 60 s resend countdown) → display name (first login).
 /// Browsing always remains available via the back button. All flow state
 /// lives in AuthController; this screen only renders the active step.
+///
+/// Stateful so the text controllers persist across rebuilds and each step's
+/// TextField carries a unique Key — otherwise Flutter reuses one field's
+/// element for the next step, which leaks the numeric keyboard and stale
+/// text from the OTP step into the name step.
 /// ---------------------------------------------------------------------------
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _nameController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +87,7 @@ class LoginScreen extends StatelessWidget {
           const SizedBox(width: AppDimens.space2),
           Expanded(
             child: TextField(
+              key: const ValueKey('login_phone'),
               keyboardType: TextInputType.phone,
               maxLength: 9,
               style: AppTextStyles.heading2.copyWith(
@@ -99,6 +118,7 @@ class LoginScreen extends StatelessWidget {
             style: AppTextStyles.bodySm.copyWith(color: c.textSecondary)),
         const SizedBox(height: AppDimens.space4),
         TextField(
+          key: const ValueKey('login_otp'),
           keyboardType: TextInputType.number,
           maxLength: 6,
           textAlign: TextAlign.center,
@@ -128,28 +148,30 @@ class LoginScreen extends StatelessWidget {
       ];
 
   /// Step 3 — public display name (first login only).
-  List<Widget> _nameStep(AuthController auth, AppColors c) {
-    final nameController = TextEditingController();
-    return [
-      Text('display_name'.tr,
-          style: AppTextStyles.heading1.copyWith(color: c.textPrimary)),
-      const SizedBox(height: AppDimens.space1),
-      Text('display_name_hint'.tr,
-          style: AppTextStyles.bodySm.copyWith(color: c.textSecondary)),
-      const SizedBox(height: AppDimens.space4),
-      TextField(
-          controller: nameController,
-          textCapitalization: TextCapitalization.words),
-      if (auth.error.value.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.only(top: AppDimens.space2),
-          child: Text(auth.error.value,
-              style: AppTextStyles.caption.copyWith(color: c.emergency)),
+  List<Widget> _nameStep(AuthController auth, AppColors c) => [
+        Text('display_name'.tr,
+            style: AppTextStyles.heading1.copyWith(color: c.textPrimary)),
+        const SizedBox(height: AppDimens.space1),
+        Text('display_name_hint'.tr,
+            style: AppTextStyles.bodySm.copyWith(color: c.textSecondary)),
+        const SizedBox(height: AppDimens.space4),
+        TextField(
+          key: const ValueKey('login_name'),
+          controller: _nameController,
+          keyboardType: TextInputType.name,
+          textCapitalization: TextCapitalization.words,
+          autofocus: true,
+          decoration: InputDecoration(hintText: 'display_name'.tr),
         ),
-      const SizedBox(height: AppDimens.space4),
-      ElevatedButton(
-          onPressed: () => auth.completeProfile(nameController.text),
-          child: Text('continue'.tr)),
-    ];
-  }
+        if (auth.error.value.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: AppDimens.space2),
+            child: Text(auth.error.value,
+                style: AppTextStyles.caption.copyWith(color: c.emergency)),
+          ),
+        const SizedBox(height: AppDimens.space4),
+        ElevatedButton(
+            onPressed: () => auth.completeProfile(_nameController.text),
+            child: Text('continue'.tr)),
+      ];
 }
