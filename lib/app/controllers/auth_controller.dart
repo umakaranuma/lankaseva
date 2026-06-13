@@ -186,50 +186,58 @@ class AuthController extends GetxController {
     if (otpInput.value.length == 6) verifyOtp();
   }
 
+  bool _isVerifying = false;
+
   /// Checks the entered code. New users continue to the display-name step;
   /// returning users are logged straight in.
   Future<void> verifyOtp() async {
-    if (_apiMode) {
-      try {
-        final res = await ApiClient.post(ApiConfig.otpVerify,
-            {'phone': '+94${phone.value}', 'otp': otpInput.value});
-        await ApiClient.setToken(res['token']);
-        final userJson = res['user'] as Map<String, dynamic>;
-        final serverUser = AppUser(
-          // App user id == backend integer PK (matches reviews.user_id).
-          id: userJson['id'].toString(),
-          phoneHash: userJson['phone_hash'],
-          displayName: userJson['display_name'] ?? 'User',
-          avatarPath: _prefs.getString('avatar_for_${userJson['phone_hash']}'),
-          createdAt:
-              DateTime.tryParse(userJson['created_at'] ?? '') ?? DateTime.now(),
-        );
-        if (res['is_new_user'] == true) {
-          _pendingApiUser = serverUser;
-          _goToNameStep(); // First time — ask for a display name.
-        } else {
-          _createSessionFromUser(serverUser);
+    if (_isVerifying) return;
+    _isVerifying = true;
+    try {
+      if (_apiMode) {
+        try {
+          final res = await ApiClient.post(ApiConfig.otpVerify,
+              {'phone': '+94${phone.value}', 'otp': otpInput.value});
+          await ApiClient.setToken(res['token']);
+          final userJson = res['user'] as Map<String, dynamic>;
+          final serverUser = AppUser(
+            // App user id == backend integer PK (matches reviews.user_id).
+            id: userJson['id'].toString(),
+            phoneHash: userJson['phone_hash'],
+            displayName: userJson['display_name'] ?? 'User',
+            avatarPath: _prefs.getString('avatar_for_${userJson['phone_hash']}'),
+            createdAt:
+                DateTime.tryParse(userJson['created_at'] ?? '') ?? DateTime.now(),
+          );
+          if (res['is_new_user'] == true) {
+            _pendingApiUser = serverUser;
+            _goToNameStep(); // First time — ask for a display name.
+          } else {
+            _createSessionFromUser(serverUser);
+          }
+        } on ApiException {
+          if (step.value == 1) error.value = 'invalid_otp'.tr;
+        } catch (_) {
+          if (step.value == 1) error.value = 'invalid_otp'.tr;
         }
-      } on ApiException {
-        error.value = 'invalid_otp'.tr;
-      } catch (_) {
-        error.value = 'invalid_otp'.tr;
+        return;
       }
-      return;
-    }
 
-    // Offline demo path.
-    if (otpInput.value != _expectedOtp) {
-      error.value = 'invalid_otp'.tr;
-      return;
-    }
-    final hash = _hashPhone('+94${phone.value}');
-    // Returning user on this device → restore name and finish.
-    final savedName = _prefs.getString('name_for_$hash');
-    if (savedName != null) {
-      _createSession(hash, savedName);
-    } else {
-      _goToNameStep(); // First time — ask for a display name.
+      // Offline demo path.
+      if (otpInput.value != _expectedOtp) {
+        if (step.value == 1) error.value = 'invalid_otp'.tr;
+        return;
+      }
+      final hash = _hashPhone('+94${phone.value}');
+      // Returning user on this device → restore name and finish.
+      final savedName = _prefs.getString('name_for_$hash');
+      if (savedName != null) {
+        _createSession(hash, savedName);
+      } else {
+        _goToNameStep(); // First time — ask for a display name.
+      }
+    } finally {
+      _isVerifying = false;
     }
   }
 
