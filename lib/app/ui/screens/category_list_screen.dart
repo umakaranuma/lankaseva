@@ -32,6 +32,19 @@ class CategoryListScreen extends StatelessWidget {
 
       return Scaffold(
         appBar: AppBar(
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color.alphaBlend(
+                      meta.color.withValues(alpha: 0.45), c.primaryDark),
+                  c.primaryDark,
+                ],
+              ),
+            ),
+          ),
           title: Row(children: [
             Icon(meta.icon, size: 20),
             const SizedBox(width: AppDimens.space2),

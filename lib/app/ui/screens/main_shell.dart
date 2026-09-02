@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/app_controller.dart';
+import '../../core/theme/app_colors.dart';
 import 'home_screen.dart';
 import 'map_screen.dart';
 import 'reviews_screen.dart';
@@ -29,10 +30,22 @@ class MainShell extends StatelessWidget {
       SettingsScreen(),
     ];
 
+    final c = AppColors.of(context);
     return Obx(() => Scaffold(
           // IndexedStack keeps each tab's scroll position alive.
           body: IndexedStack(index: app.currentTab.value, children: tabs),
-          bottomNavigationBar: BottomNavigationBar(
+          bottomNavigationBar: DecoratedBox(
+            decoration: BoxDecoration(
+              color: c.bgCard,
+              boxShadow: [
+                BoxShadow(
+                  color: c.shadowMd.first.color,
+                  blurRadius: 20,
+                  offset: const Offset(0, -4),
+                ),
+              ],
+            ),
+            child: BottomNavigationBar(
             currentIndex: app.currentTab.value,
             onTap: app.changeTab,
             items: [
@@ -55,6 +68,7 @@ class MainShell extends StatelessWidget {
                   activeIcon: const Icon(Icons.settings),
                   label: 'settings'.tr),
             ],
+            ),
           ),
         ));
   }

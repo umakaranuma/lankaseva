@@ -10,6 +10,7 @@ import '../../core/theme/app_dimens.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../data/models/service_model.dart';
 import '../../routes/app_pages.dart';
+import 'common_widgets.dart';
 
 /// ---------------------------------------------------------------------------
 /// ServiceCard
@@ -38,11 +39,12 @@ class ServiceCard extends StatelessWidget {
       final saved = app.isSaved(service.id);
 
       return Container(
-        margin: const EdgeInsets.only(bottom: AppDimens.space2),
+        margin: const EdgeInsets.only(bottom: AppDimens.space3),
         decoration: BoxDecoration(
           color: c.bgCard,
           borderRadius: BorderRadius.circular(AppDimens.radiusLg),
           border: Border.all(color: c.borderLight),
+          boxShadow: c.shadowSm,
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(AppDimens.radiusLg),
@@ -52,17 +54,8 @@ class ServiceCard extends StatelessWidget {
             padding: const EdgeInsets.all(AppDimens.space3),
             child: Row(
               children: [
-                // Category icon in a bordered circle (minimal palette —
-                // single primary accent, colour lives on the border).
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: c.borderMedium),
-                  ),
-                  child: Icon(meta.icon, color: c.primary, size: 22),
-                ),
+                // Category glyph on a soft tint of its own accent colour.
+                IconChip(icon: meta.icon, color: meta.color, size: 46),
                 const SizedBox(width: AppDimens.space3),
                 // Name, rating and status column.
                 Expanded(
@@ -75,39 +68,39 @@ class ServiceCard extends StatelessWidget {
                           style: AppTextStyles.heading3
                               .copyWith(color: c.textPrimary)),
                       const SizedBox(height: 2),
-                      Row(
+                      Wrap(
+                        spacing: AppDimens.space2,
+                        runSpacing: 4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
-                          if (count > 0) ...[
-                            Icon(Icons.star, size: 13, color: c.star),
-                            const SizedBox(width: 2),
-                            Text('${avg.toStringAsFixed(1)} ($count)',
-                                style: AppTextStyles.caption
-                                    .copyWith(color: c.textSecondary)),
-                            const SizedBox(width: AppDimens.space2),
-                          ],
-                          // Live open/closed badge — bordered, not filled
-                          // (spec 5.3).
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 1),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: isOpen ? c.success : c.emergency),
-                              borderRadius:
-                                  BorderRadius.circular(AppDimens.radiusSm),
-                            ),
-                            child: Text(isOpen ? 'open'.tr : 'closed'.tr,
-                                style: AppTextStyles.label.copyWith(
-                                    color:
-                                        isOpen ? c.success : c.emergency)),
+                          if (count > 0)
+                            Row(mainAxisSize: MainAxisSize.min, children: [
+                              Icon(Icons.star_rounded, size: 15, color: c.star),
+                              const SizedBox(width: 2),
+                              Text('${avg.toStringAsFixed(1)} ($count)',
+                                  style: AppTextStyles.caption.copyWith(
+                                      color: c.textSecondary,
+                                      fontWeight: FontWeight.w600)),
+                            ]),
+                          // Live open/closed badge — soft-filled pill.
+                          StatusPill(
+                            label: isOpen ? 'open'.tr : 'closed'.tr,
+                            color: isOpen ? c.success : c.emergency,
+                            icon: isOpen
+                                ? Icons.circle
+                                : Icons.circle_outlined,
                           ),
-                          const SizedBox(width: AppDimens.space2),
                           // Live distance: real GPS distance once a fix
                           // exists, seeded estimate before that.
-                          Text(
-                              '${Get.find<DirectoryController>().distanceOf(service).toStringAsFixed(1)} km',
-                              style: AppTextStyles.caption
-                                  .copyWith(color: c.textTertiary)),
+                          Row(mainAxisSize: MainAxisSize.min, children: [
+                            Icon(Icons.near_me_rounded,
+                                size: 12, color: c.textTertiary),
+                            const SizedBox(width: 2),
+                            Text(
+                                '${Get.find<DirectoryController>().distanceOf(service).toStringAsFixed(1)} km',
+                                style: AppTextStyles.caption
+                                    .copyWith(color: c.textTertiary)),
+                          ]),
                         ],
                       ),
                     ],
@@ -115,23 +108,26 @@ class ServiceCard extends StatelessWidget {
                 ),
                 // Bookmark heart (Profile → Saved Services, spec 4.14).
                 IconButton(
-                  icon: Icon(saved ? Icons.favorite : Icons.favorite_border,
+                  visualDensity: VisualDensity.compact,
+                  icon: Icon(
+                      saved ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                       size: 20,
                       color: saved ? c.emergency : c.textTertiary),
                   onPressed: () => app.toggleSaved(service.id),
                 ),
-                // One-tap call button — bordered (minimal, no fill).
-                IconButton(
-                  style: IconButton.styleFrom(
-                    side: BorderSide(color: c.primary),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(AppDimens.radiusMd),
-                    ),
+                // One-tap call button — solid primary, subtle lift.
+                Container(
+                  decoration: BoxDecoration(
+                    color: c.primary,
+                    borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+                    boxShadow: c.shadowSm,
                   ),
-                  icon: Icon(Icons.phone, size: 20, color: c.primary),
-                  onPressed: () =>
-                      app.callNumber(service.primaryPhone.number),
+                  child: IconButton(
+                    icon: Icon(Icons.phone_rounded,
+                        size: 20, color: c.primaryText),
+                    onPressed: () =>
+                        app.callNumber(service.primaryPhone.number),
+                  ),
                 ),
               ],
             ),

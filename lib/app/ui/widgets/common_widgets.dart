@@ -14,19 +14,107 @@ import '../../routes/app_pages.dart';
 /// presentation — any behaviour is delegated to controllers via callbacks.
 /// ---------------------------------------------------------------------------
 
-/// Uppercase tertiary section label (design rule, spec 2.3).
+/// Uppercase section label with a short gold accent tick (design rule,
+/// spec 2.3 — enriched). Optional [trailing] widget sits at the far end.
 class SectionLabel extends StatelessWidget {
   final String text;
-  const SectionLabel(this.text, {super.key});
+  final Widget? trailing;
+  const SectionLabel(this.text, {super.key, this.trailing});
 
   @override
   Widget build(BuildContext context) {
     final c = AppColors.of(context);
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppDimens.space2),
-      child: Text(
-        text.toUpperCase(),
-        style: AppTextStyles.sectionLabel.copyWith(color: c.textTertiary),
+      padding: const EdgeInsets.only(
+          bottom: AppDimens.space3, top: AppDimens.space1),
+      child: Row(
+        children: [
+          Container(
+            width: 3,
+            height: 14,
+            margin: const EdgeInsets.only(right: AppDimens.space2),
+            decoration: BoxDecoration(
+              color: c.secondary,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              text.toUpperCase(),
+              style:
+                  AppTextStyles.sectionLabel.copyWith(color: c.textSecondary),
+            ),
+          ),
+          ?trailing,
+        ],
+      ),
+    );
+  }
+}
+
+/// Rounded-square icon "chip" on a soft tint of [color] — the standard
+/// leading glyph for categories, list rows and detail headers.
+class IconChip extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final double size;
+  final double radius;
+
+  const IconChip({
+    super.key,
+    required this.icon,
+    required this.color,
+    this.size = 44,
+    this.radius = AppDimens.radiusMd,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    // Lift muted accents so they read on a near-black surface.
+    final accent = dark ? Color.lerp(color, Colors.white, 0.45)! : color;
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: dark ? 0.16 : 0.12),
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: accent.withValues(alpha: dark ? 0.22 : 0.14)),
+      ),
+      child: Icon(icon, color: accent, size: size * 0.5),
+    );
+  }
+}
+
+/// Soft-filled status pill (e.g. Open / Closed). [color] drives both the
+/// tinted background and the label.
+class StatusPill extends StatelessWidget {
+  final String label;
+  final Color color;
+  final IconData? icon;
+  const StatusPill({super.key, required this.label, required this.color, this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+          horizontal: icon == null ? 8 : 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.13),
+        borderRadius: BorderRadius.circular(AppDimens.radiusFull),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 12, color: color),
+            const SizedBox(width: 3),
+          ],
+          Text(label,
+              style: AppTextStyles.label
+                  .copyWith(color: color, fontWeight: FontWeight.w600)),
+        ],
       ),
     );
   }
@@ -73,12 +161,20 @@ class InitialsAvatar extends StatelessWidget {
       width: size,
       height: size,
       alignment: Alignment.center,
-      decoration: BoxDecoration(color: c.primaryLight, shape: BoxShape.circle),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [c.primaryLight, c.secondaryLight],
+        ),
+        shape: BoxShape.circle,
+        border: Border.all(color: c.primary.withValues(alpha: 0.20)),
+      ),
       child: Text(
         initials,
         style: TextStyle(
           color: c.primary,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           fontSize: size * 0.36,
         ),
       ),
@@ -139,10 +235,21 @@ class DistrictChip extends StatelessWidget {
             color: c.bgCard,
             borderRadius: BorderRadius.circular(AppDimens.radiusMd),
             border: Border.all(color: c.borderLight),
+            boxShadow: c.shadowSm,
           ),
           child: Row(
             children: [
-              Icon(Icons.location_on_outlined, size: 18, color: c.primary),
+              Container(
+                width: 32,
+                height: 32,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: c.primaryLight,
+                  borderRadius: BorderRadius.circular(AppDimens.radiusSm),
+                ),
+                child: Icon(Icons.location_on_rounded,
+                    size: 18, color: c.primary),
+              ),
               const SizedBox(width: AppDimens.space2),
               Expanded(
                 child: Column(
@@ -192,13 +299,13 @@ class AdStrip extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: AppDimens.space2),
       padding: const EdgeInsets.all(AppDimens.space3),
       decoration: BoxDecoration(
-        color: c.bgCard,
-        borderRadius: BorderRadius.circular(AppDimens.radiusMd),
-        border: Border.all(color: c.borderLight),
+        color: c.secondaryLight.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(AppDimens.radiusLg),
+        border: Border.all(color: c.secondary.withValues(alpha: 0.28)),
       ),
       child: Row(
         children: [
-          Icon(icon, color: c.warning),
+          IconChip(icon: icon, color: c.secondaryDark, size: 40),
           const SizedBox(width: AppDimens.space3),
           Expanded(
             child: Column(
@@ -219,14 +326,14 @@ class AdStrip extends StatelessWidget {
           ),
           const SizedBox(width: AppDimens.space2),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
             decoration: BoxDecoration(
-              color: c.bgSecondary,
+              color: c.secondary.withValues(alpha: 0.20),
               borderRadius: BorderRadius.circular(AppDimens.radiusSm),
             ),
             child: Text(
               'ad'.tr,
-              style: AppTextStyles.label.copyWith(color: c.textTertiary),
+              style: AppTextStyles.label.copyWith(color: c.secondaryDark),
             ),
           ),
         ],
@@ -258,8 +365,17 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 44, color: c.textTertiary),
-            const SizedBox(height: AppDimens.space3),
+            Container(
+              width: 76,
+              height: 76,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: c.primaryLight,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 36, color: c.primary),
+            ),
+            const SizedBox(height: AppDimens.space4),
             Text(
               message,
               textAlign: TextAlign.center,

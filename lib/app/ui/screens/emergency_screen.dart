@@ -31,15 +31,28 @@ class EmergencyScreen extends StatelessWidget {
       backgroundColor: c.emergencyLight,
       appBar: AppBar(
         backgroundColor: c.emergency,
+        flexibleSpace: Container(
+            decoration: BoxDecoration(gradient: c.accentGradient)),
         title: Text('emergency_contacts'.tr),
       ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(AppDimens.space4),
           children: [
-            // Header: icon + subtitle.
-            Icon(Icons.emergency_outlined, size: 44, color: c.emergency),
-            const SizedBox(height: AppDimens.space2),
+            // Header: icon medallion + subtitle.
+            Center(
+              child: Container(
+                width: 72,
+                height: 72,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: c.emergency.withValues(alpha: 0.14),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.emergency_rounded, size: 38, color: c.emergency),
+              ),
+            ),
+            const SizedBox(height: AppDimens.space3),
             Text('emergency_sub'.tr,
                 textAlign: TextAlign.center,
                 style: AppTextStyles.body.copyWith(color: c.textSecondary)),
@@ -56,17 +69,44 @@ class EmergencyScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(AppDimens.space4),
                     decoration: BoxDecoration(
-                      color: e.color,
-                      borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+                      // Monochrome-safe: one reserved emergency red for every
+                      // tile; the icon + name distinguish the service.
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          c.emergency,
+                          Color.alphaBlend(
+                              c.scrim.withValues(alpha: 0.24), c.emergency),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(AppDimens.radiusLg),
+                      boxShadow: [
+                        BoxShadow(
+                          color: c.emergency.withValues(alpha: 0.32),
+                          blurRadius: 16,
+                          offset: const Offset(0, 7),
+                        ),
+                      ],
                     ),
                     child: Row(children: [
-                      Icon(e.icon, color: Colors.white, size: 24),
+                      Container(
+                        width: 42,
+                        height: 42,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: c.onEmphasis.withValues(alpha: 0.22),
+                          borderRadius:
+                              BorderRadius.circular(AppDimens.radiusMd),
+                        ),
+                        child: Icon(e.icon, color: c.onEmphasis, size: 22),
+                      ),
                       const SizedBox(width: AppDimens.space3),
                       Expanded(
                         child: Text(e.nameKey.tr,
                             style: AppTextStyles.body.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500)),
+                                color: c.onEmphasis,
+                                fontWeight: FontWeight.w600)),
                       ),
                       Text(e.number, style: AppTextStyles.emergencyNumber),
                     ]),

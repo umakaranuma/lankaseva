@@ -1,57 +1,81 @@
 import 'package:flutter/material.dart';
 
 /// ---------------------------------------------------------------------------
-/// AppColors
-/// ---------------------------------------------------------------------------
-/// Central colour token definitions for LankaSeva, mirroring the design
-/// system in `docs/LankaSeva_Product_Spec.md` (sections 2.1 / 2.2).
+/// AppColors — the SINGLE source of truth for every colour in LankaSeva.
 ///
-/// Two immutable palettes are exposed (`AppColors.light` / `AppColors.dark`)
-/// and the active palette is resolved with `AppColors.of(context)` based on
-/// the current [ThemeData.brightness]. UI code must NEVER hardcode hex
-/// values — always read tokens from this class.
+/// Screens and widgets must never write a `Color(0x…)` literal or a raw
+/// `Colors.*` swatch. They read a token from here via `AppColors.of(context)`,
+/// which returns the light or dark palette for the current theme.
+///
+/// v4 palette — a calm, near-monochrome **green family** taken from the logo.
+/// Visual hierarchy comes from shade + elevation + type weight, not from many
+/// hues. Reserved non-greens:
+///   • [emergency] red  — fire / SOS / destructive only
+///   • [verified] gold  — optional "featured / verified office" badge only
+///   • [star] gold      — rating glyphs
 /// ---------------------------------------------------------------------------
 class AppColors {
-  // ---- Primary brand ----
-  final Color primary;
-  final Color primaryLight;
-  final Color primaryDark;
-  final Color primaryText;
+  // ---- Primary brand (green) ----
+  final Color primary; // #0D6552  logo-exact brand, active nav, buttons
+  final Color primaryLight; // pale wash — chips, icon wells, selected rows, badges
+  final Color primaryDark; // #0A4536  app bar / header gradient end (darkest)
+  final Color primaryText; // content ON a solid [primary] fill
+
+  // ---- Secondary (Primary Mid — a lighter green, NOT a new hue) ----
+  final Color secondary; // #1E8A6B  links, secondary buttons
+  final Color secondaryLight;
+  final Color secondaryDark;
+  final Color secondaryText;
 
   // ---- Neutral surfaces ----
-  final Color bgScreen;
-  final Color bgCard;
-  final Color bgInput;
-  final Color bgSecondary;
+  final Color bgScreen; // #EDF7F3  scaffold / section background tint
+  final Color bgCard; // #FFFFFF  cards, main content
+  final Color bgInput; // field fills
+  final Color bgSecondary; // chips, muted fills
 
   // ---- Text ----
-  final Color textPrimary;
-  final Color textSecondary;
-  final Color textTertiary;
+  final Color textPrimary; // #0E231C
+  final Color textSecondary; // #4A6B60
+  final Color textTertiary; // #96AEA4
   final Color textDisabled;
 
   // ---- Semantic ----
-  final Color emergency;
+  final Color emergency; // #C62828  reserved: fire / SOS / destructive
   final Color emergencyLight;
-  final Color success;
+  final Color success; // "open" state, positive confirmations
   final Color successLight;
   final Color warning;
   final Color warningLight;
   final Color info;
   final Color infoLight;
-  final Color star;
+  final Color star; // #C6871F  rating glyph only
   final Color starLight;
+  final Color verified; // #C6871F  optional featured / verified badge only
+  final Color verifiedLight;
 
   // ---- Borders ----
-  final Color borderLight;
+  final Color borderLight; // #D3E6DE  dividers, card outlines
   final Color borderMedium;
   final Color borderStrong;
+
+  // ---- Fixed-contrast helpers (content that sits on a coloured fill) ----
+  final Color onEmphasis; // text / icons on a gradient header or accent tile
+  final Color scrim; // darkening overlay for gradients & image scrims
+
+  // ---- Depth ----
+  final Color _shadow;
+  final List<Color> _headerGradient;
+  final List<Color> _accentGradient;
 
   const AppColors._({
     required this.primary,
     required this.primaryLight,
     required this.primaryDark,
     required this.primaryText,
+    required this.secondary,
+    required this.secondaryLight,
+    required this.secondaryDark,
+    required this.secondaryText,
     required this.bgScreen,
     required this.bgCard,
     required this.bgInput,
@@ -70,75 +94,128 @@ class AppColors {
     required this.infoLight,
     required this.star,
     required this.starLight,
+    required this.verified,
+    required this.verifiedLight,
     required this.borderLight,
     required this.borderMedium,
     required this.borderStrong,
-  });
+    required this.onEmphasis,
+    required this.scrim,
+    required Color shadow,
+    required List<Color> headerGradient,
+    required List<Color> accentGradient,
+  })  : _shadow = shadow,
+        _headerGradient = headerGradient,
+        _accentGradient = accentGradient;
 
-  /// Light mode palette — refreshed from the spec baseline for a warmer,
-  /// more inviting feel: a vivid emerald primary (trust + Sri Lankan
-  /// identity), soft mint surfaces, golden star accents and friendlier
-  /// semantic tones, all WCAG AA on their backgrounds.
+  // ---- Derived helpers -------------------------------------------------
+
+  LinearGradient get headerGradient => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: _headerGradient,
+      );
+
+  LinearGradient get accentGradient => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: _accentGradient,
+      );
+
+  List<BoxShadow> get shadowSm => [
+        BoxShadow(color: _shadow, blurRadius: 8, offset: const Offset(0, 2)),
+      ];
+
+  List<BoxShadow> get shadowMd => [
+        BoxShadow(color: _shadow, blurRadius: 18, offset: const Offset(0, 8)),
+      ];
+
+  List<BoxShadow> get shadowLg => [
+        BoxShadow(color: _shadow, blurRadius: 30, offset: const Offset(0, 14)),
+      ];
+
+  // ---- Light --------------------------------------------------------
+
   static const AppColors light = AppColors._(
-    primary: Color(0xFF00866E),
-    primaryLight: Color(0xFFDCF3EC),
-    primaryDark: Color(0xFF00604F),
+    primary: Color(0xFF0D6552),
+    primaryLight: Color(0xFFDDEFE8),
+    primaryDark: Color(0xFF0A4536),
     primaryText: Color(0xFFFFFFFF),
-    bgScreen: Color(0xFFF4F8F6),
+    secondary: Color(0xFF1E8A6B),
+    secondaryLight: Color(0xFFDDEFE8),
+    secondaryDark: Color(0xFF0D6552),
+    secondaryText: Color(0xFFFFFFFF),
+    bgScreen: Color(0xFFEDF7F3),
     bgCard: Color(0xFFFFFFFF),
-    bgInput: Color(0xFFF0F5F3),
-    bgSecondary: Color(0xFFE8EFEC),
-    textPrimary: Color(0xFF15201C),
-    textSecondary: Color(0xFF54615C),
-    textTertiary: Color(0xFF8B9893),
-    textDisabled: Color(0xFFC2CCC8),
-    emergency: Color(0xFFC53A3A),
-    emergencyLight: Color(0xFFFCEDED),
-    success: Color(0xFF2E7D32),
-    successLight: Color(0xFFE7F3E7),
-    warning: Color(0xFFB26205),
-    warningLight: Color(0xFFFBF0DE),
-    info: Color(0xFF1A6FC4),
-    infoLight: Color(0xFFE7F1FB),
-    star: Color(0xFFD98E04),
-    starLight: Color(0xFFFBF0DE),
-    borderLight: Color(0x14000000), // rgba(0,0,0,0.08)
-    borderMedium: Color(0x26000000), // rgba(0,0,0,0.15)
-    borderStrong: Color(0x40000000), // rgba(0,0,0,0.25)
+    bgInput: Color(0xFFEAF4EF),
+    bgSecondary: Color(0xFFDEEFE7),
+    textPrimary: Color(0xFF0E231C),
+    textSecondary: Color(0xFF4A6B60),
+    textTertiary: Color(0xFF7E978C),
+    textDisabled: Color(0xFF96AEA4),
+    emergency: Color(0xFFC62828),
+    emergencyLight: Color(0xFFFBEAEA),
+    success: Color(0xFF1E8A6B),
+    successLight: Color(0xFFDDEFE8),
+    warning: Color(0xFFC6871F),
+    warningLight: Color(0xFFF8EEDD),
+    info: Color(0xFF1E8A6B),
+    infoLight: Color(0xFFDDEFE8),
+    star: Color(0xFFC6871F),
+    starLight: Color(0xFFF8EEDD),
+    verified: Color(0xFFC6871F),
+    verifiedLight: Color(0xFFF8EEDD),
+    borderLight: Color(0xFFD3E6DE),
+    borderMedium: Color(0xFFBAD4C9),
+    borderStrong: Color(0xFF9DC0B2),
+    onEmphasis: Color(0xFFFFFFFF),
+    scrim: Color(0xFF000000),
+    shadow: Color(0x1A0A4536),
+    headerGradient: [Color(0xFF0D6552), Color(0xFF0A4536)],
+    accentGradient: [Color(0xFFD24A44), Color(0xFF9E2020)],
   );
 
-  /// Dark mode palette — same refreshed hues lifted for contrast on the
-  /// deep green-tinted dark surfaces (not flat black: feels warmer).
+  // ---- Dark --------------------------------------------------------
+
   static const AppColors dark = AppColors._(
-    primary: Color(0xFF2EC79E),
-    primaryLight: Color(0xFF0B3B30),
-    primaryDark: Color(0xFF00604F),
-    primaryText: Color(0xFF06281F),
-    bgScreen: Color(0xFF0E1513),
-    bgCard: Color(0xFF1A2320),
-    bgInput: Color(0xFF222C29),
-    bgSecondary: Color(0xFF293431),
-    textPrimary: Color(0xFFECF2EF),
-    textSecondary: Color(0xFFA9B5B0),
-    textTertiary: Color(0xFF6F7C77),
-    textDisabled: Color(0xFF49544F),
-    emergency: Color(0xFFEF6B6A),
-    emergencyLight: Color(0xFF491616),
-    success: Color(0xFF8FCB6B),
-    successLight: Color(0xFF1B3312),
-    warning: Color(0xFFF3A93C),
-    warningLight: Color(0xFF3E2706),
-    info: Color(0xFF7FB7F0),
-    infoLight: Color(0xFF0A2D50),
-    star: Color(0xFFF5C462),
-    starLight: Color(0xFF3E2706),
-    borderLight: Color(0x14FFFFFF),
-    borderMedium: Color(0x26FFFFFF),
-    borderStrong: Color(0x40FFFFFF),
+    primary: Color(0xFF5CB79A),
+    primaryLight: Color(0xFF123C31),
+    primaryDark: Color(0xFF0A4536),
+    primaryText: Color(0xFF062019),
+    secondary: Color(0xFF7FCBB2),
+    secondaryLight: Color(0xFF123C31),
+    secondaryDark: Color(0xFFBEE3D3),
+    secondaryText: Color(0xFF062019),
+    bgScreen: Color(0xFF0B1512),
+    bgCard: Color(0xFF12211C),
+    bgInput: Color(0xFF182A24),
+    bgSecondary: Color(0xFF1E332C),
+    textPrimary: Color(0xFFE8F1ED),
+    textSecondary: Color(0xFFA6BCB3),
+    textTertiary: Color(0xFF6E837A),
+    textDisabled: Color(0xFF47574F),
+    emergency: Color(0xFFEF5B57),
+    emergencyLight: Color(0xFF3A1512),
+    success: Color(0xFF5CB79A),
+    successLight: Color(0xFF123C31),
+    warning: Color(0xFFDBA94A),
+    warningLight: Color(0xFF3A2C10),
+    info: Color(0xFF5CB79A),
+    infoLight: Color(0xFF123C31),
+    star: Color(0xFFDBA94A),
+    starLight: Color(0xFF3A2C10),
+    verified: Color(0xFFDBA94A),
+    verifiedLight: Color(0xFF3A2C10),
+    borderLight: Color(0xFF243830),
+    borderMedium: Color(0xFF324A40),
+    borderStrong: Color(0xFF456156),
+    onEmphasis: Color(0xFFF3F8F6),
+    scrim: Color(0xFF000000),
+    shadow: Color(0x59000000),
+    headerGradient: [Color(0xFF0C5544), Color(0xFF073228)],
+    accentGradient: [Color(0xFFB23A38), Color(0xFF7C1F1E)],
   );
 
-  /// Resolves the active palette from the ambient [Theme] brightness so
-  /// every widget automatically follows light / dark mode switches.
   static AppColors of(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark ? dark : light;
 }

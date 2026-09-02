@@ -81,15 +81,19 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
             auth.isLoggedIn && reviewsCtrl.hasReviewed(service.id);
 
         return CustomScrollView(slivers: [
-          // ---- Header (single app theme colour for every service) ----
+          // ---- Header — gradient tinted toward the category colour ----
           SliverAppBar(
             backgroundColor: c.primary,
+            foregroundColor: c.onEmphasis,
             pinned: true,
-            expandedHeight: 190,
+            expandedHeight: 200,
             actions: [
               IconButton(
-                icon: Icon(saved ? Icons.favorite : Icons.favorite_border,
-                    color: Colors.white),
+                icon: Icon(
+                    saved
+                        ? Icons.favorite_rounded
+                        : Icons.favorite_border_rounded,
+                    color: c.onEmphasis),
                 onPressed: () => app.toggleSaved(service.id),
               ),
             ],
@@ -101,42 +105,57 @@ class _ServiceDetailScreenState extends State<ServiceDetailScreen> {
                   )
                 : null,
             flexibleSpace: FlexibleSpaceBar(
-              background: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppDimens.space4),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+              background: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color.alphaBlend(
+                          meta.color.withValues(alpha: 0.55), c.primaryDark),
+                      c.primaryDark,
+                    ],
+                  ),
+                ),
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppDimens.space4),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                       Container(
-                        width: 44,
-                        height: 44,
+                        width: 48,
+                        height: 48,
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            shape: BoxShape.circle),
-                        child: Icon(meta.icon, color: Colors.white),
+                            color: c.onEmphasis.withValues(alpha: 0.22),
+                            borderRadius:
+                                BorderRadius.circular(AppDimens.radiusMd)),
+                        child: Icon(meta.icon, color: c.onEmphasis, size: 24),
                       ),
                       const SizedBox(height: AppDimens.space2),
                       Text(service.name.of(lang),
                           style: AppTextStyles.heading2
-                              .copyWith(color: Colors.white)),
+                              .copyWith(color: c.onEmphasis)),
                       Text(service.department.of(lang),
                           style: AppTextStyles.bodySm.copyWith(
-                              color: Colors.white.withValues(alpha: 0.75))),
+                              color: c.onEmphasis.withValues(alpha: 0.75))),
                       const SizedBox(height: AppDimens.space1),
                       // District badge.
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
+                            color: c.onEmphasis.withValues(alpha: 0.2),
                             borderRadius:
                                 BorderRadius.circular(AppDimens.radiusSm)),
                         child: Text(service.district,
                             style: AppTextStyles.label
-                                .copyWith(color: Colors.white)),
+                                .copyWith(color: c.onEmphasis)),
                       ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

@@ -30,9 +30,18 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        flexibleSpace: Container(
+            decoration: BoxDecoration(gradient: c.headerGradient)),
         title: Row(
           children: [
-            Image.asset('assets/app_icon.png', height: 32, width: 32),
+            Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                color: c.onEmphasis.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(AppDimens.radiusSm),
+              ),
+              child: Image.asset('assets/app_icon.png', height: 24, width: 24),
+            ),
             const SizedBox(width: AppDimens.space3),
             Text('app_name'.tr,
                 style: AppTextStyles.heading2.copyWith(color: c.primaryText)),
@@ -62,25 +71,30 @@ class HomeScreen extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.all(AppDimens.space4),
           children: [
-            // ---- District chip and Search ----
-            Row(
-              children: [
-                const Expanded(child: DistrictChip()),
-                const SizedBox(width: AppDimens.space3),
-                InkWell(
+            // ---- District chip ----
+            const DistrictChip(),
+            const SizedBox(height: AppDimens.space3),
+
+            // ---- Search field (opens the Search tab) ----
+            InkWell(
+              borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+              onTap: () => app.changeTab(1),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppDimens.space4, vertical: 14),
+                decoration: BoxDecoration(
+                  color: c.bgCard,
                   borderRadius: BorderRadius.circular(AppDimens.radiusMd),
-                  onTap: () => app.changeTab(1),
-                  child: Container(
-                    padding: const EdgeInsets.all(AppDimens.space3),
-                    decoration: BoxDecoration(
-                      color: c.bgInput,
-                      borderRadius: BorderRadius.circular(AppDimens.radiusMd),
-                      border: Border.all(color: c.borderLight),
-                    ),
-                    child: Icon(Icons.search, size: 24, color: c.textTertiary),
-                  ),
+                  border: Border.all(color: c.borderLight),
+                  boxShadow: c.shadowSm,
                 ),
-              ],
+                child: Row(children: [
+                  Icon(Icons.search_rounded, size: 22, color: c.primary),
+                  const SizedBox(width: AppDimens.space3),
+                  Text('search_hint'.tr,
+                      style: AppTextStyles.body.copyWith(color: c.textTertiary)),
+                ]),
+              ),
             ),
             const SizedBox(height: AppDimens.space5),
 
@@ -91,23 +105,49 @@ class HomeScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(AppDimens.space4),
                 decoration: BoxDecoration(
-                  color: c.emergency,
+                  gradient: c.accentGradient,
                   borderRadius: BorderRadius.circular(AppDimens.radiusLg),
+                  boxShadow: [
+                    BoxShadow(
+                      color: c.emergency.withValues(alpha: 0.35),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
                 child: Row(children: [
-                  const Icon(Icons.emergency_outlined,
-                      color: Colors.white, size: 28),
+                  Container(
+                    width: 44,
+                    height: 44,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: c.onEmphasis.withValues(alpha: 0.20),
+                      borderRadius: BorderRadius.circular(AppDimens.radiusMd),
+                    ),
+                    child: Icon(Icons.emergency_rounded,
+                        color: c.onEmphasis, size: 26),
+                  ),
                   const SizedBox(width: AppDimens.space3),
                   Expanded(
-                    child: Text('emergency_contacts'.tr,
-                        style: AppTextStyles.heading2
-                            .copyWith(color: Colors.white)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('emergency_contacts'.tr,
+                            style: AppTextStyles.heading2
+                                .copyWith(color: c.onEmphasis)),
+                        Text('emergency_sub'.tr,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.caption.copyWith(
+                                color: c.onEmphasis.withValues(alpha: 0.85))),
+                      ],
+                    ),
                   ),
-                  const Icon(Icons.chevron_right, color: Colors.white),
+                  Icon(Icons.chevron_right_rounded, color: c.onEmphasis),
                 ]),
               ),
             ),
-            const SizedBox(height: AppDimens.space2),
+            const SizedBox(height: AppDimens.space3),
 
             // ---- 2×2 quick-dial grid (Police/Ambulance/Fire/Disaster) ----
             GridView.count(
@@ -123,8 +163,6 @@ class HomeScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppDimens.radiusMd),
                     // One-tap call with confirm dialog (controller handles it).
                     onTap: () => app.callNumber(e.number),
-                    // Minimal bordered tile — single emergency accent, no
-                    // multi-colour fills.
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: AppDimens.space3),
@@ -132,11 +170,21 @@ class HomeScreen extends StatelessWidget {
                         color: c.bgCard,
                         borderRadius:
                             BorderRadius.circular(AppDimens.radiusMd),
-                        border: Border.all(
-                            color: c.emergency.withValues(alpha: 0.35)),
+                        border: Border.all(color: c.borderLight),
+                        boxShadow: c.shadowSm,
                       ),
                       child: Row(children: [
-                        Icon(e.icon, color: c.emergency, size: 20),
+                        Container(
+                          width: 34,
+                          height: 34,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: c.emergency.withValues(alpha: 0.12),
+                            borderRadius:
+                                BorderRadius.circular(AppDimens.radiusSm),
+                          ),
+                          child: Icon(e.icon, color: c.emergency, size: 18),
+                        ),
                         const SizedBox(width: AppDimens.space2),
                         Expanded(
                           child: Text(e.nameKey.tr,
@@ -155,19 +203,20 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppDimens.space5),
 
-            // ---- Category grid (4 columns) — compact, minimal palette ----
+            // ---- Category grid (4 columns) — colour-coded tiles ----
             SectionLabel('browse_by_category'.tr),
             GridView.count(
               crossAxisCount: 4,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: AppDimens.space1,
-              crossAxisSpacing: AppDimens.space1,
-              childAspectRatio: 0.85,
+              mainAxisSpacing: AppDimens.space2,
+              crossAxisSpacing: AppDimens.space2,
+              childAspectRatio: 0.82,
               children: [
                 for (final meta in kCategories)
                   _CategoryTile(
                     icon: meta.icon,
+                    color: meta.color,
                     label: meta.name(lang),
                     onTap: () {
                       directory.openCategory(meta.id);
@@ -177,6 +226,8 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppDimens.space4),
+
+            const SizedBox(height: AppDimens.space2),
 
             // ---- Near you list, with a single ad strip inserted ----
             SectionLabel('${'near_you'.tr} — ${app.district.value}'),
@@ -209,6 +260,7 @@ class _LanguagePills extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final app = Get.find<AppController>();
+    final c = AppColors.of(context);
     const langs = [('si', 'සිං'), ('en', 'EN'), ('ta', 'த')];
     return Obx(() => Row(
           mainAxisSize: MainAxisSize.min,
@@ -222,14 +274,14 @@ class _LanguagePills extends StatelessWidget {
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: app.language.value == code
-                        ? Colors.white.withValues(alpha: 0.25)
+                        ? c.onEmphasis.withValues(alpha: 0.25)
                         : Colors.transparent,
                     borderRadius:
                         BorderRadius.circular(AppDimens.radiusFull),
                   ),
                   child: Text(label,
                       style: AppTextStyles.label
-                          .copyWith(color: Colors.white)),
+                          .copyWith(color: c.onEmphasis)),
                 ),
               ),
           ],
@@ -237,14 +289,17 @@ class _LanguagePills extends StatelessWidget {
   }
 }
 
-/// One minimal category tile: a bordered icon circle (single primary
-/// accent, no per-category colours) above a compact label.
+/// One category tile: a soft colour-coded icon panel above a compact label.
 class _CategoryTile extends StatelessWidget {
   final IconData icon;
+  final Color color;
   final String label;
   final VoidCallback onTap;
   const _CategoryTile(
-      {required this.icon, required this.label, required this.onTap});
+      {required this.icon,
+      required this.color,
+      required this.label,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -255,22 +310,17 @@ class _CategoryTile extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: c.bgCard,
-              shape: BoxShape.circle,
-              border: Border.all(color: c.borderMedium),
-            ),
-            child: Icon(icon, color: c.primary, size: 28),
-          ),
-          const SizedBox(height: AppDimens.space1),
+          IconChip(
+              icon: icon,
+              color: color,
+              size: 58,
+              radius: AppDimens.radiusLg),
+          const SizedBox(height: AppDimens.space2),
           Text(label,
               maxLines: 2,
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.micro.copyWith(color: c.textSecondary)),
+              style: AppTextStyles.caption.copyWith(color: c.textSecondary)),
         ],
       ),
     );

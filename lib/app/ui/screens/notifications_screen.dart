@@ -52,7 +52,7 @@ class NotificationsScreen extends StatelessWidget {
               ? TextButton(
                   onPressed: ctrl.markAllRead,
                   child: Text('mark_all_read'.tr,
-                      style: const TextStyle(color: Colors.white)),
+                      style: TextStyle(color: c.onEmphasis)),
                 )
               : const SizedBox.shrink()),
         ],

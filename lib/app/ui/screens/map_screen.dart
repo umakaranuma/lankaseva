@@ -139,13 +139,9 @@ class _MapScreenState extends State<MapScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Image.asset('assets/app_icon.png', height: 32, width: 32),
-            const SizedBox(width: AppDimens.space3),
-            Text('tab_map'.tr),
-          ],
-        ),
+        flexibleSpace: Container(
+            decoration: BoxDecoration(gradient: c.headerGradient)),
+        title: Text('tab_map'.tr),
         actions: [
           // Map / List toggle (spec 4.10) — labelled so users know they
           // can switch between the list and the map view.
@@ -263,7 +259,7 @@ class _MapScreenState extends State<MapScreen> {
                                         color: Colors.blue,
                                         shape: BoxShape.circle,
                                         border: Border.all(
-                                            color: Colors.white, width: 3),
+                                            color: c.onEmphasis, width: 3),
                                       ),
                                     ),
                                   ),

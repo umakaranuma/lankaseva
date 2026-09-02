@@ -131,10 +131,10 @@ class _SplashScreenState extends State<SplashScreen>
                             height: 108,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: Colors.white.withValues(alpha: 0.12),
+                              color: c.onEmphasis.withValues(alpha: 0.12),
                               border: Border.all(
                                   color:
-                                      Colors.white.withValues(alpha: 0.25),
+                                      c.onEmphasis.withValues(alpha: 0.25),
                                   width: 2),
                             ),
                             child: Padding(
@@ -154,13 +154,13 @@ class _SplashScreenState extends State<SplashScreen>
                             children: [
                               Text('app_name'.tr,
                                   style: AppTextStyles.display.copyWith(
-                                      color: Colors.white,
+                                      color: c.onEmphasis,
                                       fontSize: 32,
                                       letterSpacing: 0.5)),
                               const SizedBox(height: AppDimens.space1),
                               Text(AppInfo.appNameLatin.toUpperCase(),
                                   style: AppTextStyles.sectionLabel.copyWith(
-                                      color: Colors.white
+                                      color: c.onEmphasis
                                           .withValues(alpha: 0.7),
                                       letterSpacing: 4)),
                               const SizedBox(height: AppDimens.space5),
@@ -169,12 +169,12 @@ class _SplashScreenState extends State<SplashScreen>
                                   width: 36,
                                   height: 2,
                                   color:
-                                      Colors.white.withValues(alpha: 0.35)),
+                                      c.onEmphasis.withValues(alpha: 0.35)),
                               const SizedBox(height: AppDimens.space5),
                               Text('app_tagline'.tr,
                                   textAlign: TextAlign.center,
                                   style: AppTextStyles.body.copyWith(
-                                      color: Colors.white
+                                      color: c.onEmphasis
                                           .withValues(alpha: 0.9))),
                             ],
                           ),
@@ -195,7 +195,7 @@ class _SplashScreenState extends State<SplashScreen>
                         // Backend unreachable — the app has no offline data,
                         // so offer a retry rather than an empty home screen.
                         Icon(Icons.cloud_off_outlined,
-                            color: Colors.white.withValues(alpha: 0.85),
+                            color: c.onEmphasis.withValues(alpha: 0.85),
                             size: 28),
                         const SizedBox(height: AppDimens.space2),
                         Padding(
@@ -204,7 +204,7 @@ class _SplashScreenState extends State<SplashScreen>
                           child: Text('connection_error'.tr,
                               textAlign: TextAlign.center,
                               style: AppTextStyles.body.copyWith(
-                                  color: Colors.white.withValues(alpha: 0.9))),
+                                  color: c.onEmphasis.withValues(alpha: 0.9))),
                         ),
                         const SizedBox(height: AppDimens.space3),
                         FilledButton.tonal(
@@ -217,12 +217,12 @@ class _SplashScreenState extends State<SplashScreen>
                           height: 18,
                           child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white.withValues(alpha: 0.6)),
+                              color: c.onEmphasis.withValues(alpha: 0.6)),
                         ),
                       const SizedBox(height: AppDimens.space3),
                       Text('v${AppInfo.version}',
                           style: AppTextStyles.caption.copyWith(
-                              color: Colors.white.withValues(alpha: 0.55))),
+                              color: c.onEmphasis.withValues(alpha: 0.55))),
                     ],
                   ),
                 ),

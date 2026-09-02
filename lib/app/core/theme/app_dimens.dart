@@ -17,10 +17,11 @@ class AppDimens {
   static const double space6 = 24; // Large section gap
 
   // ---- Border radius ----
-  static const double radiusSm = 6; // Badges, chips
-  static const double radiusMd = 10; // Buttons, inputs, small cards
-  static const double radiusLg = 14; // Service cards, modals
-  static const double radiusXl = 20; // Bottom sheets
+  static const double radiusSm = 8; // Badges, chips
+  static const double radiusMd = 12; // Buttons, inputs, small cards
+  static const double radiusLg = 16; // Service cards, modals
+  static const double radiusXl = 22; // Bottom sheets, hero cards
+  static const double radiusXxl = 28; // Pull-up sheets
   static const double radiusFull = 999; // Avatars, language pills
 
   /// Minimum accessible touch target (spec 5.10 — 44×44pt).

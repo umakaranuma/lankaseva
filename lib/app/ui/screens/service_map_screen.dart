@@ -148,7 +148,7 @@ class _ServiceMapScreenState extends State<ServiceMapScreen> {
                       decoration: BoxDecoration(
                         color: Colors.blue,
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 3),
+                        border: Border.all(color: c.onEmphasis, width: 3),
                       ),
                     ),
                   ),
@@ -185,11 +185,11 @@ class _ServiceMapScreenState extends State<ServiceMapScreen> {
                   color: c.bgCard,
                   borderRadius: BorderRadius.circular(AppDimens.radiusLg),
                   border: Border.all(color: c.borderLight),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                        color: Colors.black26,
+                        color: c.scrim.withValues(alpha: 0.16),
                         blurRadius: 8,
-                        offset: Offset(0, 2)),
+                        offset: const Offset(0, 2)),
                   ],
                 ),
                 child: Row(children: [

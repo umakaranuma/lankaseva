@@ -28,13 +28,9 @@ class SearchScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Image.asset('assets/app_icon.png', height: 32, width: 32),
-            const SizedBox(width: AppDimens.space3),
-            Text('tab_search'.tr),
-          ],
-        ),
+        flexibleSpace: Container(
+            decoration: BoxDecoration(gradient: c.headerGradient)),
+        title: Text('tab_search'.tr),
       ),
       body: SafeArea(
         child: Column(
@@ -118,9 +114,14 @@ class SearchScreen extends StatelessWidget {
                       SectionLabel('categories'.tr),
                       for (final meta in search.categoryResults)
                         ListTile(
-                          leading: Icon(meta.icon, color: meta.color),
-                          title: Text(meta.name(lang)),
-                          trailing: const Icon(Icons.chevron_right, size: 18),
+                          contentPadding: EdgeInsets.zero,
+                          leading: IconChip(
+                              icon: meta.icon, color: meta.color, size: 40),
+                          title: Text(meta.name(lang),
+                              style: AppTextStyles.heading3
+                                  .copyWith(color: c.textPrimary)),
+                          trailing: Icon(Icons.chevron_right_rounded,
+                              size: 20, color: c.textTertiary),
                           onTap: () {
                             search.rememberSearch(search.query.value);
                             directory.openCategory(meta.id);
@@ -132,9 +133,16 @@ class SearchScreen extends StatelessWidget {
                       SectionLabel('districts'.tr),
                       for (final name in search.districtResults)
                         ListTile(
-                          leading: Icon(Icons.location_on_outlined,
-                              color: c.primary),
-                          title: Text(name),
+                          contentPadding: EdgeInsets.zero,
+                          leading: IconChip(
+                              icon: Icons.location_on_rounded,
+                              color: c.primary,
+                              size: 40),
+                          title: Text(name,
+                              style: AppTextStyles.heading3
+                                  .copyWith(color: c.textPrimary)),
+                          trailing: Icon(Icons.chevron_right_rounded,
+                              size: 20, color: c.textTertiary),
                           onTap: () {
                             search.rememberSearch(name);
                             app.changeDistrict(name);
