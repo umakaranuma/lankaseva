@@ -34,17 +34,19 @@ class HomeScreen extends StatelessWidget {
             decoration: BoxDecoration(gradient: c.headerGradient)),
         title: Row(
           children: [
+            // Solid white plate so the logo reads clearly on the green bar.
             Container(
-              padding: const EdgeInsets.all(5),
+              padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: c.onEmphasis.withValues(alpha: 0.16),
+                color: c.onEmphasis,
                 borderRadius: BorderRadius.circular(AppDimens.radiusSm),
+                boxShadow: c.shadowSm,
               ),
-              child: Image.asset('assets/app_icon.png', height: 24, width: 24),
+              child: Image.asset('assets/app_icon.png', height: 26, width: 26),
             ),
             const SizedBox(width: AppDimens.space3),
             Text('app_name'.tr,
-                style: AppTextStyles.heading2.copyWith(color: c.primaryText)),
+                style: AppTextStyles.heading2.copyWith(color: c.onEmphasis)),
           ],
         ),
         actions: [
@@ -98,22 +100,17 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppDimens.space5),
 
-            // ---- Emergency banner ----
+            // ---- Emergency banner — outlined card, red border only ----
             InkWell(
               borderRadius: BorderRadius.circular(AppDimens.radiusLg),
               onTap: () => Get.toNamed(Routes.emergency),
               child: Container(
                 padding: const EdgeInsets.all(AppDimens.space4),
                 decoration: BoxDecoration(
-                  gradient: c.accentGradient,
+                  color: c.bgCard,
                   borderRadius: BorderRadius.circular(AppDimens.radiusLg),
-                  boxShadow: [
-                    BoxShadow(
-                      color: c.emergency.withValues(alpha: 0.35),
-                      blurRadius: 18,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+                  border: Border.all(color: c.emergency, width: 1.5),
+                  boxShadow: c.shadowSm,
                 ),
                 child: Row(children: [
                   Container(
@@ -121,11 +118,11 @@ class HomeScreen extends StatelessWidget {
                     height: 44,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: c.onEmphasis.withValues(alpha: 0.20),
+                      color: c.emergency.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(AppDimens.radiusMd),
                     ),
                     child: Icon(Icons.emergency_rounded,
-                        color: c.onEmphasis, size: 26),
+                        color: c.emergency, size: 26),
                   ),
                   const SizedBox(width: AppDimens.space3),
                   Expanded(
@@ -134,16 +131,16 @@ class HomeScreen extends StatelessWidget {
                       children: [
                         Text('emergency_contacts'.tr,
                             style: AppTextStyles.heading2
-                                .copyWith(color: c.onEmphasis)),
+                                .copyWith(color: c.emergency)),
                         Text('emergency_sub'.tr,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.caption.copyWith(
-                                color: c.onEmphasis.withValues(alpha: 0.85))),
+                            style: AppTextStyles.caption
+                                .copyWith(color: c.textSecondary)),
                       ],
                     ),
                   ),
-                  Icon(Icons.chevron_right_rounded, color: c.onEmphasis),
+                  Icon(Icons.chevron_right_rounded, color: c.emergency),
                 ]),
               ),
             ),

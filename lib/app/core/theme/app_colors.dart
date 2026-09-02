@@ -178,14 +178,17 @@ class AppColors {
   // ---- Dark --------------------------------------------------------
 
   static const AppColors dark = AppColors._(
-    primary: Color(0xFF5CB79A),
-    primaryLight: Color(0xFF123C31),
+    // A confident, saturated emerald that keeps the brand hue instead of the
+    // pale mint tint — reads as "professional" on the near-black surfaces
+    // while still clearing the 3:1 contrast bar for icons / controls.
+    primary: Color(0xFF2E9E7C),
+    primaryLight: Color(0xFF10362C),
     primaryDark: Color(0xFF0A4536),
-    primaryText: Color(0xFF062019),
-    secondary: Color(0xFF7FCBB2),
-    secondaryLight: Color(0xFF123C31),
+    primaryText: Color(0xFF04231B),
+    secondary: Color(0xFF54BE9C),
+    secondaryLight: Color(0xFF10362C),
     secondaryDark: Color(0xFFBEE3D3),
-    secondaryText: Color(0xFF062019),
+    secondaryText: Color(0xFF04231B),
     bgScreen: Color(0xFF0B1512),
     bgCard: Color(0xFF12211C),
     bgInput: Color(0xFF182A24),

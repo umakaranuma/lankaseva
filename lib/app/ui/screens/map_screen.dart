@@ -146,16 +146,17 @@ class _MapScreenState extends State<MapScreen> {
           // Map / List toggle (spec 4.10) — labelled so users know they
           // can switch between the list and the map view.
           Obx(() => TextButton.icon(
+                style: TextButton.styleFrom(foregroundColor: c.onEmphasis),
                 icon: Icon(
                     directory.mapAsList.value
                         ? Icons.map_outlined
                         : Icons.view_list_outlined,
                     size: 18,
-                    color: c.primaryText),
+                    color: c.onEmphasis),
                 label: Text(
                     directory.mapAsList.value ? 'map'.tr : 'list_view'.tr,
                     style: AppTextStyles.bodySm
-                        .copyWith(color: c.primaryText)),
+                        .copyWith(color: c.onEmphasis)),
                 onPressed: directory.toggleMapAsList,
               )),
           const SizedBox(width: AppDimens.space2),
