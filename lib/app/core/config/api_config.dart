@@ -1,6 +1,4 @@
-import 'dart:io' show Platform;
-
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'app_environment.dart';
 
 /// ---------------------------------------------------------------------------
 /// ApiConfig — the single place that defines the backend origin and every
@@ -8,29 +6,17 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 ///
 /// Nothing else in the codebase should hard-code an `/api/...` string or a
 /// host: data sources and controllers reference these members so the whole
-/// integration can be re-pointed (staging, production, a teammate's LAN IP)
-/// from one file or one `--dart-define`.
+/// integration can be re-pointed (live, production, a teammate's LAN IP) from
+/// one place — the `kEnvironment` switch in `lib/main.dart` and the matching
+/// `.env.<name>` file.
 /// ---------------------------------------------------------------------------
 class ApiConfig {
   ApiConfig._();
 
-  /// Backend origin (scheme + host + port), no trailing slash.
-  ///
-  /// Resolution order:
-  ///   1. `--dart-define=API_BASE_URL=https://api.lankaseva.lk` (prod/staging)
-  ///   2. Android emulator → `http://10.0.2.2:8000` (reaches the host machine)
-  ///   3. Everything else (desktop/web/iOS sim) → `http://127.0.0.1:8000`
-  ///
-  /// For a physical phone on the same Wi-Fi, pass your PC's LAN IP:
-  ///   flutter run --dart-define=API_BASE_URL=http://192.168.1.x:8000
-  static String get baseUrl {
-    const fromEnv = String.fromEnvironment('API_BASE_URL');
-    if (fromEnv.isNotEmpty) return fromEnv;
-    if (!kIsWeb && Platform.isAndroid) {
-      return 'https://retha-unbickering-ardella.ngrok-free.dev';
-    }
-    return 'https://retha-unbickering-ardella.ngrok-free.dev';
-  }
+  /// Backend origin (scheme + host + port), no trailing slash, no `/api`.
+  /// Value of `API_BASE_URL` from the `.env` file selected by `kEnvironment`
+  /// (see [AppEnvironment]).
+  static String get baseUrl => AppEnvironment.apiBaseUrl;
 
   /// Network timeout for a single request.
   static const Duration timeout = Duration(seconds: 8);

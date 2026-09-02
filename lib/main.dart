@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'app/core/config/api_config.dart';
+import 'app/core/config/app_environment.dart';
 import 'app/controllers/app_controller.dart';
 import 'app/controllers/auth_controller.dart';
 import 'app/controllers/directory_controller.dart';
@@ -15,16 +18,25 @@ import 'app/core/localization/app_translations.dart';
 import 'app/core/theme/app_theme.dart';
 import 'app/routes/app_pages.dart';
 
-/// ---------------------------------------------------------------------------
-/// LankaSeva — application entry point.
+/// ═══════════════════════════════════════════════════════════════════════════
+///  ENVIRONMENT SWITCH — change this one line, then run/build normally.
 ///
-/// Bootstraps the controller layer (GetX, permanent instances) BEFORE the
-/// first frame so persisted preferences (language, district, theme, session,
-/// reviews) are available immediately, then launches the GetMaterialApp with
-/// the design-system themes and the trilingual translation map.
-/// ---------------------------------------------------------------------------
+///    AppEnv.development  → .env.development  (local backend)
+///    AppEnv.live         → .env.live
+///    AppEnv.production    → .env.production
+///
+///  `flutter run`, `flutter build apk --release`, etc. all read this.
+/// ═══════════════════════════════════════════════════════════════════════════
+const AppEnv kEnvironment = AppEnv.development;
+
+/// LankaSeva entry point. Loads the [kEnvironment] `.env` file, then boots.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppEnvironment.load(kEnvironment);
+
+  if (kDebugMode) {
+    debugPrint('LankaSeva • env=${AppEnvironment.name} • api=${ApiConfig.baseUrl}');
+  }
 
   // ---- Controller registration (single source of truth for all state) ----
   final app = Get.put(AppController(), permanent: true);

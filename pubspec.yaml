@@ -44,6 +44,7 @@ dependencies:
   share_plus: ^13.1.0
   image_picker: ^1.2.2
   path_provider: ^2.1.5
+  flutter_dotenv: ^6.0.1
 
 dev_dependencies:
   flutter_test:
@@ -77,6 +78,10 @@ flutter:
   assets:
     - assets/app_icon.png
     - assets/launcher_icon.png
+    # Environment files loaded at runtime by flutter_dotenv (see main.dart).
+    - .env.development
+    - .env.live
+    - .env.production
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

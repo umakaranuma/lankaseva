@@ -36,11 +36,13 @@ migrate_working_dir/
 /coverage/
 .fvm/
 
-# Environment / secrets
-*.env
+# Environment
+# .env.development / .env.live / .env.production are committed (URLs / public
+# config, loaded by flutter_dotenv — see lib/main.dart's kEnvironment switch).
+# A local-only .env is ignored.
 .env
-.env.*
-!.env.example
+.env.local
+.env.*.local
 **/android/app/google-services.json
 **/ios/Runner/GoogleService-Info.plist
 
