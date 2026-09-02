@@ -35,6 +35,67 @@ class LocationController extends GetxController {
   bool get hasFix => position.value != null;
 
   // -------------------------------------------------------------------
+  // Startup / auto-acquire
+  // -------------------------------------------------------------------
+
+  /// Called from main(). If location permission was already granted on a
+  /// previous run, silently acquire a fix now so every distance label is
+  /// real from the first frame. Never prompts here.
+  Future<void> init() async {
+    try {
+      final p = await Geolocator.checkPermission();
+      if (p == LocationPermission.whileInUse ||
+          p == LocationPermission.always) {
+        await _acquire();
+      }
+    } catch (_) {
+      // Platform not ready / plugin error — distances fall back to estimates.
+    }
+  }
+
+  /// One-shot: make sure we have the user's location, running the full
+  /// permission prompt when needed. Safe to call from a screen's initState.
+  /// No-ops when a fix already exists or permission is permanently denied.
+  Future<void> ensureLocation() async {
+    if (hasFix) return;
+    try {
+      final p = await Geolocator.checkPermission();
+      if (p == LocationPermission.deniedForever) return;
+    } catch (_) {
+      return;
+    }
+    await getCurrentPosition();
+  }
+
+  /// Re-reads the current GPS position (used to keep distances fresh, e.g.
+  /// when the Home tab is re-opened). Silent — no prompts.
+  Future<void> refreshFix() async {
+    try {
+      final p = await Geolocator.checkPermission();
+      if (p == LocationPermission.whileInUse ||
+          p == LocationPermission.always) {
+        await _acquire();
+      }
+    } catch (_) {}
+  }
+
+  /// Low-level position read with a graceful fall back to the last known
+  /// fix. Assumes permission is already granted.
+  Future<void> _acquire() async {
+    try {
+      position.value = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 12),
+        ),
+      );
+    } catch (_) {
+      final last = await Geolocator.getLastKnownPosition();
+      if (last != null) position.value = last;
+    }
+  }
+
+  // -------------------------------------------------------------------
   // Permission flow
   // -------------------------------------------------------------------
 
@@ -109,7 +170,7 @@ class LocationController extends GetxController {
     try {
       final fix = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.medium, // District-level is enough
+          accuracy: LocationAccuracy.high, // exact distance labels
           timeLimit: Duration(seconds: 15),
         ),
       );

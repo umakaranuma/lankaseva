@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../controllers/app_controller.dart';
 import '../../controllers/directory_controller.dart';
 import '../../controllers/emergency_controller.dart';
+import '../../controllers/location_controller.dart';
 import '../../controllers/notification_controller.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
@@ -19,8 +20,23 @@ import '../widgets/service_card.dart';
 /// district chip, emergency banner + quick-dial grid, category grid,
 /// "Near you" list with one ad strip.
 /// ---------------------------------------------------------------------------
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Get the user's real GPS position once the home tab is live so the
+    // "Near you" cards show an accurate distance (prompts for permission
+    // the first time; no-op afterwards / if permanently denied).
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => Get.find<LocationController>().ensureLocation());
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -42,7 +42,7 @@ Future<void> main() async {
   final app = Get.put(AppController(), permanent: true);
   final auth = Get.put(AuthController(), permanent: true);
   Get.put(ReviewController(), permanent: true);
-  Get.put(LocationController(), permanent: true);
+  final location = Get.put(LocationController(), permanent: true);
   final geocoder = Get.put(GeocodingController(), permanent: true);
   Get.put(DirectoryController(), permanent: true);
   Get.put(EmergencyController(), permanent: true);
@@ -62,6 +62,9 @@ Future<void> main() async {
     search.init(),
     geocoder.init(),
     notifications.init(),
+    // Silently restores a GPS fix when location permission was already
+    // granted, so "Near you" distances are real on the first frame.
+    location.init(),
   ]);
 
   runApp(LankaSevaApp(initialLanguage: app.language.value));
