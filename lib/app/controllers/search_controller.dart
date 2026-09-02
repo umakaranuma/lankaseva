@@ -5,6 +5,7 @@ import '../core/constants/app_constants.dart';
 import '../data/models/service_model.dart';
 import '../data/sources/service_data_source.dart';
 import 'app_controller.dart';
+import 'location_controller.dart';
 
 /// ---------------------------------------------------------------------------
 /// ServiceSearchController
@@ -41,7 +42,17 @@ class ServiceSearchController extends GetxController {
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
     recentSearches.assignAll(_prefs.getStringList(_kRecent) ?? const []);
+    // Re-rank the current results when the GPS fix lands / changes, so
+    // "nearest first" is applied even if the user searched before the fix.
+    ever(Get.find<LocationController>().position, (_) {
+      if (query.value.trim().isNotEmpty) onQueryChanged(query.value);
+    });
   }
+
+  /// Straight-line distance (km) from the user to a service; falls back to
+  /// the seeded estimate until a GPS fix exists.
+  double _distanceOf(Service s) =>
+      Get.find<LocationController>().distanceTo(s);
 
   // -------------------------------------------------------------------
   // Search
@@ -62,8 +73,9 @@ class ServiceSearchController extends GetxController {
     final lang = Get.find<AppController>().language.value;
 
     // Services: match name / department / phone / address / district in
-    // all languages (spec search scope).
-    serviceResults.assignAll(ServiceDataSource.services.where((s) {
+    // all languages (spec search scope), then rank NEAREST-FIRST so the
+    // closest matches sit at the top; the rest follow by distance.
+    final matches = ServiceDataSource.services.where((s) {
       bool hit(LocalizedText t) =>
           t.si.toLowerCase().contains(q) ||
           t.en.toLowerCase().contains(q) ||
@@ -74,7 +86,9 @@ class ServiceSearchController extends GetxController {
           s.district.toLowerCase().contains(q) ||
           s.phones.any((p) => p.number.contains(q)) ||
           categoryMeta(s.category).name(lang).toLowerCase().contains(q);
-    }).take(30));
+    }).toList()
+      ..sort((a, b) => _distanceOf(a).compareTo(_distanceOf(b)));
+    serviceResults.assignAll(matches.take(30));
 
     // Categories.
     categoryResults.assignAll(kCategories.where((c) =>
